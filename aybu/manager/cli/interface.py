@@ -22,26 +22,52 @@ import plac
 class BaseInterface(object):
 
     def exit(self):
-        return plac.Interpreter.Exit
+        raise plac.Interpreter.Exit
+
+    def quit(self):
+        self.exit()
 
     def __init__(self):
-        self.commands.append('exit')
+        self.commands.extend(['exit', 'quit'])
+        if not hasattr(self, 'root_url'):
+            self.root_url = '/{}'.format(self.name)
 
     @classmethod
     def init(cls, main, client):
         cls.main = main
         cls.api = client
 
-    def get_url(self, url):
-        if not url.startswith("/"):
-            url = "/{}".format(url)
-        return "{}{}".format(self.root_url, url)
+    def get_url(self, *parts):
+        url = self.root_url
+        for part in parts:
+            if not part.startswith("/"):
+                part = "/{}".format(part)
+            url = "{}{}".format(url, part)
+        return url
 
     def remove(self, resource):
         self.api.delete(self.get_url(resource))
 
     def list(self):
-        print self.api.get(self.root_url)
+        try:
+            response, content = self.api.get(self.root_url)
+
+        except ValueError:
+            pass
+
+        else:
+            for res in content:
+                print " * {}".format(res)
 
     def info(self, resource):
-        self.api.get(self.get_url(resource))
+        try:
+            response, content = self.api.get(self.get_url(resource))
+
+        except ValueError:
+            pass
+
+        else:
+            for k,v in content.iteritems():
+                print "{}: {}".format(k, v)
+
+

@@ -24,7 +24,6 @@ class InstanceInterface(BaseInterface):
     commands = ['list', 'deploy', 'remove', 'enable', 'disable', 'flush',
                 'reload']
     name = 'instances'
-    root_url = '/instances'
 
     def deploy(self, domain, environment, owner, technical_contact,
                theme='', default_language='it', disabled=0):

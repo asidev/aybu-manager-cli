@@ -21,21 +21,23 @@ from . interface import BaseInterface
 
 class TaskInterface(BaseInterface):
 
-    commands = ['list', 'logs', 'remove', 'flush', 'status']
+    commands = ['list', 'logs', 'remove', 'flush', 'info', 'flush_logs']
     name = 'tasks'
 
-    def list(self):
-        pass
+    def logs(self, task):
+        try:
+            response, content = self.api.get(self.get_url(task, 'logs'))
 
-    def logs(self):
-        pass
+        except ValueError:
+            pass
 
-    def remove(self):
-        pass
+        else:
+            for log in content:
+                print log.strip()
 
     def flush(self):
-        pass
+        self.api.delete(self.root_url)
 
-    def status(self):
-        pass
+    def flush_logs(self, task):
+        self.api.delete(self.get_url(task, 'logs'))
 

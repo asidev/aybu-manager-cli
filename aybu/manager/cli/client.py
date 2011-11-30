@@ -18,10 +18,11 @@ limitations under the License.
 
 
 import ConfigParser
-import requests
+import json
 import logging
 import os
 import platform
+import requests
 import zmq
 
 log = logging.getLogger(__name__)
@@ -92,7 +93,7 @@ class AybuManagerClient(object):
         except Exception as e:
             log.error("%s: %s", response.status_code, e)
         else:
-            log.debug(response.content)
+            log.debug("%s", response.content)
 
         return response
 
@@ -109,7 +110,8 @@ class AybuManagerClient(object):
         return self.request('head', url, **kwargs)
 
     def get(self, url, **kwargs):
-        return self.request('get', url, **kwargs)
+        response = self.request('get', url, **kwargs)
+        return response, json.loads(response.content)
 
     def execute_task(self, method, *args, **kwargs):
         try:

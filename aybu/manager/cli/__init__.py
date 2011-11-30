@@ -48,7 +48,7 @@ class AybuManagerCliInterface(object):
         self.log.setLevel(getattr(logging, self.loglevel))
         self.log.addHandler(logging.StreamHandler())
 
-        self.commands = []
+        self.commands = ['exit', 'quit']
         for intf in self.interfaces:
             setattr(self, intf.name, self.create_command_for_interface(intf))
             self.commands.append(intf.name)
@@ -70,9 +70,11 @@ class AybuManagerCliInterface(object):
             args.insert(0, "-i")
         plac.Interpreter.call(interface, verbose=True, arglist=args,
                               prompt="aybu «{}» > ".format(interface.name))
+    def exit(self):
+        raise plac.Interpreter.Exit
 
     def quit(self):
-        raise plac.Interpreter.Exit
+        self.exit()
 
 
 def main():
