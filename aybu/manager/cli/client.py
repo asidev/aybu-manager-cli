@@ -93,7 +93,7 @@ class AybuManagerClient(object):
         except Exception as e:
             log.error("%s: %s", response.status_code, e)
         else:
-            log.debug("%s", response.content)
+            log.debug(response)
 
         return response
 

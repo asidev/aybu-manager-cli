@@ -36,16 +36,16 @@ class AybuManagerCliInterface(object):
 
     @plac.annotations(
         configfile=('Path to the config file', 'option', "f"),
-        loglevel=('Logging level', 'option', 'l')
+        verbose=('Be verbose', 'flag', 'v')
     )
-    def __init__(self, configfile, loglevel):
+    def __init__(self, configfile, verbose):
 
         self.__doc__ = "\nUse help to see subcommands"
         self.configfile = configfile or '~/.aybu_manager_cli.conf'
         self.configfile = os.path.expanduser(self.configfile)
-        self.loglevel = loglevel.upper() if loglevel else 'INFO'
+        self.loglevel = logging.INFO if not verbose else logging.DEBUG
         self.log = logging.getLogger('aybu')
-        self.log.setLevel(getattr(logging, self.loglevel))
+        self.log.setLevel(self.loglevel)
         self.log.addHandler(logging.StreamHandler())
 
         self.commands = ['exit', 'quit']
