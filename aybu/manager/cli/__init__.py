@@ -22,12 +22,13 @@ import plac
 
 from . instance import InstanceInterface
 from . task import TaskInterface
+from . environment import EnvironmentInterface
 from . client import AybuManagerClient
 
 
 class AybuManagerCliInterface(object):
 
-    interfaces = (InstanceInterface, TaskInterface)
+    interfaces = (InstanceInterface, TaskInterface, EnvironmentInterface)
 
     def create_command_for_interface(self, intf):
         def command(*args, **kwargs):
