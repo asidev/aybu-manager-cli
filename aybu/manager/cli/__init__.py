@@ -31,7 +31,7 @@ class AybuManagerCliInterface(object):
 
     interfaces = (InstanceInterface, TaskInterface, EnvironmentInterface)
     interface_instances = {}
-    commands = set(('exit', 'quit'))
+    commands = set(('exit', 'quit', 'help_commands'))
 
     def create_commands_for_interface(self, intf_cls):
         interface = intf_cls(self.api_client)
@@ -73,6 +73,13 @@ class AybuManagerCliInterface(object):
 
     def quit(self):
         self.exit()
+
+    def help_commands(self):
+        print " ".join([c for c in self.commands if c not in ("help",
+                                                              "help_commands",
+                                                              "exit",
+                                                              ".last_tb",
+                                                              "quit")])
 
 
 def main():

@@ -37,8 +37,6 @@ class AybuManagerClient(object):
         self.username = username
         self.password = password
         self.sub_addr = subscription_addr
-        log.info('Created API client for %s, user is %s, subscribing to %s',
-                 self.host, self.username, self.sub_addr)
         self.zmq_context = zmq.Context()
         self.zmq_response_socket = self.zmq_context.socket(zmq.SUB)
         self.zmq_response_socket.connect(self.sub_addr)
