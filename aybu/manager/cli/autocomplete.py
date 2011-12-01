@@ -29,7 +29,7 @@ class AybuManagerCliReadline(plac.ReadlineInput):
         parts = current_line.split(" ")
         nparts = len(parts)
 
-        if nparts == 1:
+        if nparts == 1 or parts[0] == 'help':
             # complete commands
             completions = [c for c in self.factory.commands if c.startswith(kw)]
 
