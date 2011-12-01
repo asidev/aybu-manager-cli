@@ -16,26 +16,56 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-import plac
+import inspect
 
 
 class BaseInterface(object):
 
-    def exit(self):
-        raise plac.Interpreter.Exit
-
-    def quit(self):
-        self.exit()
-
-    def __init__(self):
-        self.commands.extend(['exit', 'quit'])
+    def __init__(self, client):
+        self.api = client
         if not hasattr(self, 'root_url'):
             self.root_url = '/{}'.format(self.name)
 
-    @classmethod
-    def init(cls, main, client):
-        cls.main = main
-        cls.api = client
+    def get_completions(self, command, parts):
+        """ This function get called during autocompletion.
+            command is the command name, i.e. tasks_list <TAB> call this function
+            on TaskInterface with "list" as command.
+            parts is a list of kw to complete against
+        """
+
+        # first: if we have a get_${command}_completion call it
+        attr = "get_{}_completions"
+        try:
+            return getattr(self, attr)(command, parts)
+
+        except AttributeError:
+            pass
+
+        # use the default complete function
+        return self.default_complete(command, parts)
+
+    def default_complete(self, command, parts):
+        """ This function is very simple: if command has a single argument
+            we assume that it is self, so we do no completion at all.
+            If the command has more than one arg, we can't know what to do,
+            so we do nothing.
+            Else autocomplete on primary keys, i.e. call get_list()
+        """
+
+        kw = parts[0]
+        try:
+            if len(inspect.getargspec(getattr(self, command)).args) == 1:
+                return []
+
+        except AttributeError:
+            return []
+
+        # string startswith themselves, avoid replication
+        res = set(self.get_list(quiet=True))
+        if kw in res:
+            return []
+
+        return [w for w in res if w.startswith(kw)]
 
     def get_url(self, *parts):
         url = self.root_url
@@ -48,16 +78,19 @@ class BaseInterface(object):
     def remove(self, resource):
         self.api.delete(self.get_url(resource))
 
-    def list(self):
+    def get_list(self, quiet=False):
         try:
-            response, content = self.api.get(self.root_url)
+            response, content = self.api.get(self.root_url, quiet=quiet)
 
         except ValueError:
-            pass
+            return []
 
         else:
-            for res in content:
-                print " * {}".format(res)
+            return content
+
+    def list(self):
+        for res in self.get_list():
+            print " * {}".format(res)
 
     def info(self, resource):
         try:

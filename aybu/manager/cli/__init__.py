@@ -24,6 +24,7 @@ from . instance import InstanceInterface
 from . task import TaskInterface
 from . environment import EnvironmentInterface
 from . client import AybuManagerClient
+from . autocomplete import AybuManagerCliReadline
 
 
 class AybuManagerCliInterface(object):
@@ -76,6 +77,9 @@ class AybuManagerCliInterface(object):
 
 def main():
     try:
+        histfile = os.path.expanduser('~/{}.history'.format(__name__))
+        completer = AybuManagerCliReadline(histfile=histfile,
+                                           factory=AybuManagerCliInterface)
         plac.Interpreter.call(AybuManagerCliInterface,
                               stdin=completer, verbose=True, prompt='aybu> ')
     except KeyboardInterrupt:

@@ -83,17 +83,26 @@ class AybuManagerClient(object):
 
     def request(self, method, url, *args, **kwargs):
         url = self.url(url)
-        log.info("%s %s", method.upper(), url)
+
         auth = kwargs.pop('auth', self.auth_info)
         timeout = kwargs.pop('timeout', self.timeout)
         kwargs.update(dict(timeout=timeout, auth=auth))
+
+        quiet = kwargs.pop('quiet', False)
+        if not quiet:
+            log.info("%s %s", method.upper(), url)
+
         response = requests.request(method, url, *args, **kwargs)
         try:
             response.raise_for_status()
+
         except Exception as e:
-            log.error("%s: %s", response.status_code, e)
+            if not quiet:
+                log.error("%s: %s", response.status_code, e)
+
         else:
-            log.debug(response)
+            if not quiet:
+                log.debug(response)
 
         return response
 
