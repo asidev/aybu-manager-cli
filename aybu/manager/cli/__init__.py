@@ -29,11 +29,16 @@ from . client import AybuManagerClient
 class AybuManagerCliInterface(object):
 
     interfaces = (InstanceInterface, TaskInterface, EnvironmentInterface)
+    interface_instances = {}
+    commands = set(('exit', 'quit'))
 
-    def create_command_for_interface(self, intf):
-        def command(*args, **kwargs):
-            return self.dispatch(intf, *args, **kwargs)
-        return command
+    def create_commands_for_interface(self, intf_cls):
+        interface = intf_cls(self.api_client)
+        self.__class__.interface_instances[intf_cls.name] = interface
+        for command in interface.commands:
+            command_name = "{}_{}".format(intf_cls.name, command)
+            setattr(self, command_name, getattr(interface, command))
+            self.__class__.commands.add(command_name)
 
     @plac.annotations(
         configfile=('Path to the config file', 'option', "f"),
@@ -48,14 +53,12 @@ class AybuManagerCliInterface(object):
         self.log = logging.getLogger('aybu')
         self.log.setLevel(self.loglevel)
         self.log.addHandler(logging.StreamHandler())
+        self.api_client = AybuManagerClient.create_from_config(self.configfile)
 
-        self.commands = ['exit', 'quit']
         for intf in self.interfaces:
-            setattr(self, intf.name, self.create_command_for_interface(intf))
-            self.commands.append(intf.name)
+            self.create_commands_for_interface(intf)
 
     def __enter__(self):
-        self.api_client = AybuManagerClient.create_from_config(self.configfile)
         return self
 
     def __exit__(self, etype, exc, tb):
@@ -64,13 +67,6 @@ class AybuManagerCliInterface(object):
             if self._interact_:
                 print "exiting..."
 
-    def dispatch(self, interface, *args):
-        interface.init(main=self, client=self.api_client)
-        if self._interact_:
-            args = list(args)
-            args.insert(0, "-i")
-        plac.Interpreter.call(interface, verbose=True, arglist=args,
-                              prompt="aybu «{}» > ".format(interface.name))
     def exit(self):
         raise plac.Interpreter.Exit
 
@@ -81,7 +77,7 @@ class AybuManagerCliInterface(object):
 def main():
     try:
         plac.Interpreter.call(AybuManagerCliInterface,
-                            verbose=True, prompt='aybu> ')
+                              stdin=completer, verbose=True, prompt='aybu> ')
     except KeyboardInterrupt:
         print "interrupted"
 
