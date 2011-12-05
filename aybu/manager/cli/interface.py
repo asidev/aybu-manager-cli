@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import plac
 import inspect
 
 
@@ -54,7 +55,11 @@ class BaseInterface(object):
 
         kw = parts[0]
         try:
-            if len(inspect.getargspec(getattr(self, command)).args) == 1:
+            argsspec = inspect.getargspec(getattr(self, command))
+            num_non_kw_params = len(argsspec.args)
+            if argsspec.defaults:
+                num_non_kw_params = num_non_kw_params - len(argsspec.defaults)
+            if num_non_kw_params == 1:
                 return []
 
         except AttributeError:
@@ -86,11 +91,23 @@ class BaseInterface(object):
             return []
 
         else:
-            return content
+            return content.keys()
 
-    def list(self):
-        for res in self.get_list():
-            print " * {}".format(res)
+    @plac.annotations(
+        full=('Get complete output', 'flag', 'f')
+    )
+    def list(self, full=False):
+        try:
+            response, content = self.api.get(self.root_url, quiet=True)
+            for res, info in content.iteritems():
+                print " * {}".format(res)
+
+            if full:
+                for attr in sorted(info.keys()):
+                    print "   > {:<20}:{}".format(attr, info[attr])
+
+        except ValueError:
+            return
 
     def info(self, resource):
         try:
