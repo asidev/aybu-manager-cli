@@ -99,6 +99,8 @@ class BaseInterface(object):
     def list(self, full=False):
         try:
             response, content = self.api.get(self.root_url, quiet=True)
+            res = []
+            info = {}
             for res, info in content.iteritems():
                 print " * {}".format(res)
 
@@ -119,5 +121,15 @@ class BaseInterface(object):
         else:
             for k,v in content.iteritems():
                 print "{}: {}".format(k, v)
+
+    def delete(self, resource):
+        try:
+            response, content = self.api.delete(self.get_url(resource))
+
+        except ValueError:
+            pass
+
+        else:
+            print response
 
 
