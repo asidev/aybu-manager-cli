@@ -21,7 +21,7 @@ from . interface import BaseInterface
 
 class TaskInterface(BaseInterface):
 
-    commands = ['list', 'logs', 'remove', 'flush', 'info', 'flush_logs']
+    commands = ['list', 'logs', 'delete', 'flush', 'info', 'flush_logs']
     name = 'tasks'
 
     def logs(self, task):

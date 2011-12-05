@@ -80,9 +80,6 @@ class BaseInterface(object):
             url = "{}{}".format(url, part)
         return url
 
-    def remove(self, resource):
-        self.api.delete(self.get_url(resource))
-
     def get_list(self, quiet=False):
         try:
             response, content = self.api.get(self.root_url, quiet=quiet)

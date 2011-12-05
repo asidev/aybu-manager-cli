@@ -21,7 +21,7 @@ from . interface import BaseInterface
 
 class InstanceInterface(BaseInterface):
 
-    commands = ['list', 'deploy', 'remove', 'enable', 'disable', 'flush',
+    commands = ['list', 'deploy', 'delete', 'enable', 'disable', 'flush',
                 'reload']
     name = 'instances'
 
