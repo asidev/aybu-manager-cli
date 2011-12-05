@@ -23,13 +23,15 @@ import plac
 from . instance import InstanceInterface
 from . task import TaskInterface
 from . environment import EnvironmentInterface
+from . theme import ThemeInterface
 from . client import AybuManagerClient
 from . autocomplete import AybuManagerCliReadline
 
 
 class AybuManagerCliInterface(object):
 
-    interfaces = (InstanceInterface, TaskInterface, EnvironmentInterface)
+    interfaces = (InstanceInterface, TaskInterface, EnvironmentInterface,
+                  ThemeInterface)
     interface_instances = {}
     commands = set(('exit', 'quit', 'help_commands'))
 
