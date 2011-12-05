@@ -40,4 +40,3 @@ class TaskInterface(BaseInterface):
 
     def flush_logs(self, task):
         self.api.delete(self.get_url(task, 'logs'))
-
