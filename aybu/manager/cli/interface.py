@@ -108,7 +108,11 @@ class BaseInterface(object):
         except ValueError:
             return
 
+    @plac.annotations(
+        resource=('The resource to operate on', 'option')
+    )
     def info(self, resource):
+        """ Get the info of the given resource """
         try:
             response, content = self.api.get(self.get_url(resource))
 
@@ -119,7 +123,11 @@ class BaseInterface(object):
             for k,v in content.iteritems():
                 print "{}: {}".format(k, v)
 
+    @plac.annotations(
+        resource=('The resource to operate on', 'option')
+    )
     def delete(self, resource):
+        """ Delete the selected resource """
         try:
             response, content = self.api.delete(self.get_url(resource))
 
