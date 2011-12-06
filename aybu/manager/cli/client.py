@@ -104,16 +104,16 @@ class AybuManagerClient(object):
 
         except requests.exceptions.RequestException as e:
             print "Error connection to API: {} - {}".format(type(e).__name__, e)
+            return None, None
 
         try:
             response.raise_for_status()
             return None, None
 
-        except Exception as e:
-            print "Error in response: {} {} - {}".format(
+        except Exception:
+            print "Error in response: {} {}".format(
                         response.status_code,
-                        self.status_code_to_string(response.status_code),
-                        e)
+                        self.status_code_to_string(response.status_code))
             if 'x-request-error' in response.headers:
                 print "message: {}".format(response.headers['x-request-error'])
             return response, None
