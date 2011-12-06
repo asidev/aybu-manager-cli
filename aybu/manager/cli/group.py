@@ -16,27 +16,25 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import plac
 from . interface import BaseInterface
 
+class GroupInterface(BaseInterface):
 
-class TaskInterface(BaseInterface):
+    commands = ['list', 'create', 'rename', 'info', 'delete']
+    name = 'groups'
 
-    commands = ['list', 'logs', 'delete', 'flush', 'info', 'flush_logs']
-    name = 'tasks'
+    @plac.annotations(
+        group=('Group name', 'option', 'g', str, None, 'NAME')
+    )
+    def create(self, group):
+        """ Create a new empty group """
+        self.api.post(self.get_url(), {'group':group})
 
-    def logs(self, task):
-        try:
-            response, content = self.api.get(self.get_url(task, 'logs'))
+    @plac.annotations(
+        name=('Existing group name', 'option', '-g', str, None, 'NAME'),
+        new_name=('New group name', 'option', '-n', str, None, 'NAME')
+    )
+    def rename(self, name, new_name):
+        self.api.put(self.get_url(name), {'name': new_name})
 
-        except ValueError:
-            pass
-
-        else:
-            for log in content:
-                print log.strip()
-
-    def flush(self):
-        self.api.delete(self.root_url, quiet=False)
-
-    def flush_logs(self, task):
-        self.api.delete(self.get_url(task, 'logs'), quiet=False)

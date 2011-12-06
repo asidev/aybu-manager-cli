@@ -22,11 +22,12 @@ from . interface import BaseInterface
 class InstanceInterface(BaseInterface):
 
     commands = ['list', 'deploy', 'delete', 'enable', 'disable', 'flush',
-                'reload']
+                'reload', 'delete', 'archive', 'restore']
     name = 'instances'
 
     def deploy(self, domain, environment, owner, technical_contact,
                theme='', default_language='it', disabled=0):
+        """ deploy a new instance for a given domain. """
         data=dict(
             domain=domain,
             environment_name=environment,
@@ -38,17 +39,43 @@ class InstanceInterface(BaseInterface):
         self.api.execute_sync_task('post', self.root_url, data=data)
 
     def enable(self, domain):
-        self.api.put(self.get_url(domain),
-                     {'action': 'enable'})
+        """ Reenable a previously disabled instance """
+        self.api.execute_sync_task('put', self.get_url(domain),
+                                   {'action': 'enable'})
 
     def disable(self, domain):
-        self.api.put(self.get_url(domain),
-                     {'action': 'disable'})
+        """ Disable an instance, i.e. it stops the vassal but keep data and db
+            in place"""
+        self.api.execute_sync_task('put', self.get_url(domain),
+                                   {'action': 'disable'})
 
     def flush(self, domain):
-        self.api.put(self.get_url(domain),
-                     {'action': 'flush'})
+        """ Flush cache for an instance """
+        self.api.execute_sync_task('put', self.get_url(domain),
+                                   {'action': 'flush_cache'})
 
     def reload(self, domain):
-        self.api.put(self.get_url(domain),
-                     {'action': 'reload'})
+        """ Reload the vassal for an instance """
+        self.api.execute_sync_task('put', self.get_url(domain),
+                                   {'action': 'reload'})
+
+    def kill(self, domain):
+        """ Kill an instance's vassal sending SIGTERM to the process """
+        self.api.execute_sync_task('put', self.get_url(domain),
+                                   {'action': 'kill'})
+
+    def sentence(self, domain):
+        """ Kill an instance's vassal sending a SIGKILL to the process """
+        self.api.execute_sync_task('put', self.get_url(domain),
+                                   {'action': 'sentence'})
+
+    def archive(self, domain):
+        """ Create an archive of an instance. """
+        self.api.execute_sync_task('put', self.get_url(domain),
+                                   {'action': 'restore'})
+
+    def restore(self, domain, archive):
+        """ Restore an instance using a pre-created archive """
+        self.api.execute_sync_task('put', self.get_url(domain),
+                                   {'action': 'restore',
+                                    'archive': archive})

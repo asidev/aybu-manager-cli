@@ -69,8 +69,7 @@ class ThemeInterface(BaseInterface):
         if version:
             data['version'] = version
 
-        response, content = self.api.post(self.get_url(), data)
-        print response
+        self.api.post(self.get_url(), data)
 
     @plac.annotations(
         theme=('Theme to update', 'option', '-t', str, None, 'NAME')
@@ -82,15 +81,14 @@ class ThemeInterface(BaseInterface):
         """
         if not attribute:
             raise ValueError('Missing options')
-        data = {'name': theme}
+
+        data = {}
         for attr in attribute:
             k, v = attr.split('=',1)
             data[k] = v
 
-        response, content = self.api.post(self.get_url(theme), data)
-        print response
-        if not content:
-            return
-        for k, v in content.iteritems():
-            print "{:<20}: {}".format(k, v)
+        response, content = self.api.put(self.get_url(theme), data)
+        if content:
+            for k, v in content.iteritems():
+                print "{:<20}: {}".format(k, v)
 

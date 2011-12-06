@@ -22,10 +22,16 @@ import inspect
 
 class BaseInterface(object):
 
-    def __init__(self, client):
+    def __init__(self, client, main_interface):
         self.api = client
+        self.main = main_interface
         if not hasattr(self, 'root_url'):
             self.root_url = '/{}'.format(self.name)
+
+    @property
+    def interactive(self):
+        return self.main._interact_ if hasattr(self.main, '_interact_') \
+                                    else False
 
     def get_completions(self, command, parts):
         """ This function get called during autocompletion.
@@ -91,13 +97,16 @@ class BaseInterface(object):
             return content.keys()
 
     @plac.annotations(
-        full=('Get complete output', 'flag', 'f')
+        full=('Get complete output', 'flag', 'f'),
+        verbose=('Be verbose', 'flag', 'v')
     )
-    def list(self, full=False):
+    def list(self, full=False, verbose=False):
         try:
-            response, content = self.api.get(self.root_url, quiet=True)
+            quiet = not verbose
+            response, content = self.api.get(self.root_url, quiet=quiet)
             res = []
             info = {}
+            content = content or {}
             for res, info in content.iteritems():
                 print " * {}".format(res)
 
@@ -128,13 +137,6 @@ class BaseInterface(object):
     )
     def delete(self, resource):
         """ Delete the selected resource """
-        try:
-            response, content = self.api.delete(self.get_url(resource))
-
-        except ValueError:
-            pass
-
-        else:
-            print response
+        self.api.delete(self.get_url(resource, quiet=False))
 
 

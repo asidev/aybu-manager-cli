@@ -23,6 +23,7 @@ import logging
 import os
 import platform
 import requests
+import httplib
 import zmq
 
 log = logging.getLogger(__name__)
@@ -45,6 +46,10 @@ class AybuManagerClient(object):
         self.auth_info = None if not username or not password \
                          else (username, password)
         self.timeout = timeout
+
+    @staticmethod
+    def status_code_to_string(status_code):
+        return httplib.responses[status_code]
 
     @classmethod
     def create_from_config(cls, configfile, overrides={}):
@@ -87,22 +92,41 @@ class AybuManagerClient(object):
         kwargs.update(dict(timeout=timeout, auth=auth))
 
         quiet = kwargs.pop('quiet', False)
+        debug = kwargs.pop('debug', False)
+        if debug:
+            quiet = False
+
         if not quiet:
             log.info("%s %s", method.upper(), url)
 
-        response = requests.request(method, url, *args, **kwargs)
+        try:
+            response = requests.request(method, url, *args, **kwargs)
+
+        except requests.exceptions.RequestException as e:
+            print "Error connection to API: {} - {}".format(type(e).__name__, e)
+
         try:
             response.raise_for_status()
+            return None, None
 
         except Exception as e:
-            if not quiet:
-                log.error("%s: %s", response.status_code, e)
+            print "Error in response: {} {} - {}".format(
+                        response.status_code,
+                        self.status_code_to_string(response.status_code),
+                        e)
+            if 'x-request-error' in response.headers:
+                print "message: {}".format(response.headers['x-request-error'])
+            return response, None
 
         else:
-            if not quiet:
+            if debug:
                 log.debug(response)
 
-        return response
+            if not quiet:
+                print "OK {} {}".format(response.status_code,
+                             self.status_code_to_string(response.status_code))
+            content = json.loads(response.content) if response.content else None
+            return response, content
 
     def post(self, url, data, **kwargs):
         return self.request('post', url, data=data, **kwargs)
@@ -117,18 +141,18 @@ class AybuManagerClient(object):
         return self.request('head', url, **kwargs)
 
     def get(self, url, **kwargs):
-        response = self.request('get', url, **kwargs)
-        return response, json.loads(response.content)
+        return self.request('get', url, **kwargs)
 
     def execute_task(self, method, *args, **kwargs):
         try:
             uuid = self.uuid()
             headers = {'X-Task-UUID': uuid}
-            response = self.request(method, *args, headers=headers, **kwargs)
+            response, content = self.request(method, *args, headers=headers,
+                                             **kwargs)
             response.raise_for_status()
 
             log.info("Task {}: {}".format(response.headers['x-task-uuid'],
-                                        response.headers['x-task-status']))
+                                          response.headers['x-task-status']))
             return response
 
         finally:

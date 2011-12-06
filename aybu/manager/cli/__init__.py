@@ -24,6 +24,8 @@ from . instance import InstanceInterface
 from . task import TaskInterface
 from . environment import EnvironmentInterface
 from . theme import ThemeInterface
+from . group import GroupInterface
+from . user import UserInterface
 from . client import AybuManagerClient
 from . autocomplete import AybuManagerCliReadline
 
@@ -31,12 +33,12 @@ from . autocomplete import AybuManagerCliReadline
 class AybuManagerCliInterface(object):
 
     interfaces = (InstanceInterface, TaskInterface, EnvironmentInterface,
-                  ThemeInterface)
+                  ThemeInterface, GroupInterface, UserInterface)
     interface_instances = {}
     commands = set(('exit', 'quit', 'help_commands'))
 
     def create_commands_for_interface(self, intf_cls):
-        interface = intf_cls(self.api_client)
+        interface = intf_cls(self.api_client, self)
         self.__class__.interface_instances[intf_cls.name] = interface
         for command in interface.commands:
             command_name = "{}_{}".format(intf_cls.name, command)
@@ -44,8 +46,8 @@ class AybuManagerCliInterface(object):
             self.__class__.commands.add(command_name)
 
     @plac.annotations(
-        configfile=('Path to the config file', 'option', "f"),
-        verbose=('Be verbose', 'flag', 'v')
+        configfile=('Path to the config file', 'option', "F"),
+        verbose=('Be verbose', 'flag', 'V')
     )
     def __init__(self, configfile, verbose):
 
