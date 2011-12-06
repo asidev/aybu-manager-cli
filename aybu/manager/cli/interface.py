@@ -72,7 +72,7 @@ class BaseInterface(object):
             return []
 
         # string startswith themselves, avoid replication
-        res = set(self.get_list(quiet=True))
+        res = set(self.get_list(quiet=True, debug=False))
         if kw in res:
             return []
 
@@ -86,9 +86,12 @@ class BaseInterface(object):
             url = "{}{}".format(url, part)
         return url
 
-    def get_list(self, quiet=False):
+    def get_list(self, quiet=False, debug=None):
+        kwargs = dict(quiet=quiet)
+        if not debug is None:
+            kwargs['debug'] = debug
         try:
-            response, content = self.api.get(self.root_url, quiet=quiet)
+            response, content = self.api.get(self.root_url, **kwargs)
 
         except ValueError:
             return []

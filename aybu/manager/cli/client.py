@@ -107,8 +107,8 @@ class AybuManagerClient(object):
         if debug:
             quiet = False
 
-        if not quiet:
-            log.info("%s %s", method.upper(), url)
+#        if not quiet:
+#            log.info("%s %s", method.upper(), url)
 
         try:
             response = requests.request(method, url, *args, **kwargs)
@@ -134,7 +134,6 @@ class AybuManagerClient(object):
 
         else:
             if debug:
-                print response
                 self.print_headers(response.headers)
 
             if not quiet:
