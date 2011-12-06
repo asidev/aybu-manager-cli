@@ -108,7 +108,6 @@ class AybuManagerClient(object):
 
         try:
             response.raise_for_status()
-            return None, None
 
         except Exception:
             print "Error in response: {} {}".format(
@@ -125,7 +124,11 @@ class AybuManagerClient(object):
             if not quiet:
                 print "OK {} {}".format(response.status_code,
                              self.status_code_to_string(response.status_code))
-            content = json.loads(response.content) if response.content else None
+            try:
+                content = json.loads(response.content)
+            except (AttributeError, ValueError):
+                content = None
+
             return response, content
 
     def post(self, url, data, **kwargs):

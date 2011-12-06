@@ -25,15 +25,15 @@ class GroupInterface(BaseInterface):
     name = 'groups'
 
     @plac.annotations(
-        group=('Group name', 'option', 'g', str, None, 'NAME')
+        group=('Group name', 'positional', None, str, None, 'NAME')
     )
     def create(self, group):
         """ Create a new empty group """
-        self.api.post(self.get_url(), {'group':group})
+        self.api.post(self.get_url(), {'name': group})
 
     @plac.annotations(
-        name=('Existing group name', 'option', '-g', str, None, 'NAME'),
-        new_name=('New group name', 'option', '-n', str, None, 'NAME')
+        name=('Existing group name', 'positional', None, str, None, 'NAME'),
+        new_name=('New group name', 'positional', None, str, None, 'NAME')
     )
     def rename(self, name, new_name):
         self.api.put(self.get_url(name), {'name': new_name})

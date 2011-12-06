@@ -96,47 +96,37 @@ class BaseInterface(object):
         else:
             return content.keys()
 
+
+    def print_info(self, content, prompt=''):
+        for attr in sorted(content.keys()):
+            print "{}{:<20}: {}".format(prompt, attr, content[attr])
+
     @plac.annotations(
         full=('Get complete output', 'flag', 'f'),
         verbose=('Be verbose', 'flag', 'v')
     )
     def list(self, full=False, verbose=False):
-        try:
-            quiet = not verbose
-            response, content = self.api.get(self.root_url, quiet=quiet)
-            res = []
-            info = {}
-            content = content or {}
-            for res, info in content.iteritems():
-                print " * {}".format(res)
-
+        quiet = not verbose
+        response, content = self.api.get(self.root_url, quiet=quiet)
+        content = content or {}
+        for res in sorted(content):
+            print " * {}".format(res)
             if full:
-                for attr in sorted(info.keys()):
-                    print "   > {:<20}:{}".format(attr, info[attr])
-
-        except ValueError:
-            return
+                self.print_info(content[res], prompt='   > ')
 
     @plac.annotations(
-        resource=('The resource to operate on', 'option')
+        resource=('The resource to operate on', 'positional')
     )
     def info(self, resource):
         """ Get the info of the given resource """
-        try:
-            response, content = self.api.get(self.get_url(resource))
-
-        except ValueError:
-            pass
-
-        else:
-            for k,v in content.iteritems():
-                print "{}: {}".format(k, v)
+        response, content = self.api.get(self.get_url(resource))
+        self.print_info(content)
 
     @plac.annotations(
-        resource=('The resource to operate on', 'option')
+        resource=('The resource to operate on', 'positional')
     )
     def delete(self, resource):
         """ Delete the selected resource """
-        self.api.delete(self.get_url(resource, quiet=False))
+        self.api.delete(self.get_url(resource), quiet=False)
 
 
