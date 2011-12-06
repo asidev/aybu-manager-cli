@@ -58,7 +58,8 @@ class AybuManagerCliInterface(object):
         self.log = logging.getLogger('aybu')
         self.log.setLevel(self.loglevel)
         self.log.addHandler(logging.StreamHandler())
-        self.api_client = AybuManagerClient.create_from_config(self.configfile)
+        self.api_client = AybuManagerClient.create_from_config(self.configfile,
+                                                               debug=verbose)
 
         for intf in self.interfaces:
             self.create_commands_for_interface(intf)

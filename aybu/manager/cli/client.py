@@ -32,7 +32,8 @@ log = logging.getLogger(__name__)
 class AybuManagerClient(object):
 
     def __init__(self, host, subscription_addr,
-                 username=None, password=None, timeout=None):
+                 username=None, password=None, timeout=None,
+                 debug=False):
 
         self.host = host
         self.username = username
@@ -46,13 +47,17 @@ class AybuManagerClient(object):
         self.auth_info = None if not username or not password \
                          else (username, password)
         self.timeout = timeout
+        self.debug = debug
+        if debug:
+            print "Created client for {} (user: {}, subscription: {})"\
+                    .format(self.host, self.username, self.sub_addr)
 
     @staticmethod
     def status_code_to_string(status_code):
         return httplib.responses[status_code]
 
     @classmethod
-    def create_from_config(cls, configfile, overrides={}):
+    def create_from_config(cls, configfile, debug=False, overrides={}):
         config = ConfigParser.ConfigParser()
         try:
             with open(configfile) as f:
@@ -62,7 +67,7 @@ class AybuManagerClient(object):
             log.critical("Cannot read config file: {}".format(e))
             raise
 
-        kwargs = {}
+        kwargs = {'debug': debug}
         for var in ('username', 'password', 'host', 'subscription_addr',
                     'timeout'):
             try:
@@ -84,6 +89,11 @@ class AybuManagerClient(object):
     def url(self, path_info):
         return "{}{}".format(self.host, path_info)
 
+    def print_headers(self, headers):
+        print "Headers: "
+        for h in sorted(headers):
+            print " {:<20}: {}".format(h.title(), headers[h])
+
     def request(self, method, url, *args, **kwargs):
         url = self.url(url)
 
@@ -92,7 +102,8 @@ class AybuManagerClient(object):
         kwargs.update(dict(timeout=timeout, auth=auth))
 
         quiet = kwargs.pop('quiet', False)
-        debug = kwargs.pop('debug', False)
+        debug = self.debug or kwargs.pop('debug', False)
+
         if debug:
             quiet = False
 
@@ -114,12 +125,17 @@ class AybuManagerClient(object):
                         response.status_code,
                         self.status_code_to_string(response.status_code))
             if 'x-request-error' in response.headers:
-                print "message: {}".format(response.headers['x-request-error'])
+                print "Message: {}".format(response.headers['x-request-error'])
+
+            if debug:
+                self.print_headers(response.headers)
+
             return response, None
 
         else:
             if debug:
-                log.debug(response)
+                print response
+                self.print_headers(response.headers)
 
             if not quiet:
                 print "OK {} {}".format(response.status_code,
