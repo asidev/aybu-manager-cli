@@ -1,7 +1,7 @@
 from setuptools import setup, find_packages
 
 setup(name='aybu-manager-cli',
-      version=':versiontools:aybu.manager.cli.version:',
+      version=':versiontools:aybu.manager.cli:',
       description="AyBU instances manager cli",
       long_description="""AyBU instances manager command line interface""",
       classifiers=('License :: OSI Approved :: Apache Software License',
@@ -24,7 +24,7 @@ setup(name='aybu-manager-cli',
       ),
       entry_points = """\
       [console_scripts]
-        aybu_manager_cli = aybu.manager.cli:main
+        aybu_manager_cli = aybu.manager.cli.main:main
       """,
       tests_require=('nose', 'coverage'),
       setup_requires=('versiontools >= 1.8',),
