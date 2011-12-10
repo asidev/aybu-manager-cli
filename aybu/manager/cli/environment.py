@@ -20,7 +20,7 @@ from . interface import BaseInterface
 
 
 class EnvironmentInterface(BaseInterface):
-    commands = ['list', 'create', 'delete', 'rename']
+    commands = ['list', 'create', 'delete', 'rename', 'info']
     name = 'envs'
     root_url = '/environments'
 
