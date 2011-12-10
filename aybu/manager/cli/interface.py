@@ -101,6 +101,9 @@ class BaseInterface(object):
 
 
     def print_info(self, content, prompt=''):
+        if not content:
+            return
+
         for attr in sorted(content.keys()):
             print "{}{:<20}: {}".format(prompt, attr, content[attr])
 
