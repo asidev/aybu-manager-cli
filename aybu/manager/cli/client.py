@@ -167,10 +167,11 @@ class AybuManagerClient(object):
             headers = {'X-Task-UUID': uuid}
             response, content = self.request(method, *args, headers=headers,
                                              **kwargs)
-            response.raise_for_status()
+            if response:
+                response.raise_for_status()
 
-            log.info("Task {}: {}".format(response.headers['x-task-uuid'],
-                                          response.headers['x-task-status']))
+                log.info("Task {}: {}".format(response.headers['x-task-uuid'],
+                                            response.headers['x-task-status']))
             return response
 
         finally:
@@ -179,6 +180,8 @@ class AybuManagerClient(object):
     def execute_sync_task(self, method, *args, **kwargs):
         try:
             response = self.execute_task(method, *args, **kwargs)
+            if not response:
+                return
 
             if response.headers['x-task-status'] == 'DEFERRED':
                 return response
