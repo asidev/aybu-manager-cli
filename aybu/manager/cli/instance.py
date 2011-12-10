@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import plac
 from . interface import BaseInterface
 
 
@@ -25,8 +26,18 @@ class InstanceInterface(BaseInterface):
                 'reload', 'delete', 'archive', 'restore']
     name = 'instances'
 
+    @plac.annotations(
+        domain=('Domain to deploy', 'positional', None),
+        environment=('Env to deploy to', 'positional'),
+        owner=('Owner of the instance', 'positional'),
+        technical_contact=('Tech contact of the instance', 'positional'),
+        theme=('Theme name', 'option', 't', str, None, 'THEME_NAME'),
+        default_language=('Default language for autoredirect', 'option', 'l'),
+        disabled=('Mark the instance as disabled once deployed', 'flag', 'd'),
+        verbose=('Enable debugging messages', 'flag', 'v')
+    )
     def deploy(self, domain, environment, owner, technical_contact,
-               theme='', default_language='it', disabled=0):
+               theme='', default_language='it', disabled=False, verbose=False):
         """ deploy a new instance for a given domain. """
         data=dict(
             domain=domain,
@@ -35,6 +46,7 @@ class InstanceInterface(BaseInterface):
             technical_contact_email=technical_contact,
             theme=theme,
             default_language=default_language,
+            verbose='true' if verbose else '',
             enabled='true' if not disabled else '')
         self.api.execute_sync_task('post', self.root_url, data=data)
 
