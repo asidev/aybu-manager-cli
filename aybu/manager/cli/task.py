@@ -25,13 +25,9 @@ class TaskInterface(BaseInterface):
     name = 'tasks'
 
     def logs(self, task):
-        try:
-            response, content = self.api.get(self.get_url(task, 'logs'))
+        response, content = self.api.get(self.get_url(task, 'logs'))
 
-        except ValueError:
-            pass
-
-        else:
+        if content:
             for log in content:
                 print log.strip()
 
