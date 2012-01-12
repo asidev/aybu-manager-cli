@@ -23,7 +23,7 @@ from . interface import BaseInterface
 class InstanceInterface(BaseInterface):
 
     commands = ['list', 'deploy', 'delete', 'enable', 'disable', 'flush',
-                'reload', 'delete', 'archive', 'restore']
+                'reload', 'delete', 'archive', 'restore', 'info']
     name = 'instances'
 
     @plac.annotations(
@@ -50,44 +50,61 @@ class InstanceInterface(BaseInterface):
             enabled='true' if not disabled else '')
         self.api.execute_sync_task('post', self.root_url, data=data)
 
+    @plac.annotations(domain=('The instance to enable', 'positional'))
     def enable(self, domain):
         """ Reenable a previously disabled instance """
         self.api.execute_sync_task('put', self.get_url(domain),
                                    {'action': 'enable'})
 
+    @plac.annotations(domain=('The instance to disable', 'positional'))
     def disable(self, domain):
         """ Disable an instance, i.e. it stops the vassal but keep data and db
             in place"""
         self.api.execute_sync_task('put', self.get_url(domain),
                                    {'action': 'disable'})
 
+    @plac.annotations(domain=('The instance to flush', 'positional'))
     def flush(self, domain):
         """ Flush cache for an instance """
         self.api.execute_sync_task('put', self.get_url(domain),
                                    {'action': 'flush_cache'})
 
+    @plac.annotations(domain=('The instance to reload', 'positional'))
     def reload(self, domain):
         """ Reload the vassal for an instance """
         self.api.execute_sync_task('put', self.get_url(domain),
                                    {'action': 'reload'})
 
+    @plac.annotations(domain=('The instance to kill', 'positional'))
     def kill(self, domain):
         """ Kill an instance's vassal sending SIGTERM to the process """
         self.api.execute_sync_task('put', self.get_url(domain),
                                    {'action': 'kill'})
 
+    @plac.annotations(domain=('The instance to kill', 'positional'))
     def sentence(self, domain):
         """ Kill an instance's vassal sending a SIGKILL to the process """
         self.api.execute_sync_task('put', self.get_url(domain),
                                    {'action': 'sentence'})
 
+    @plac.annotations(domain=('The instance to archive', 'positional'))
     def archive(self, domain):
         """ Create an archive of an instance. """
         self.api.execute_sync_task('put', self.get_url(domain),
                                    {'action': 'restore'})
 
+    @plac.annotations(domain=('The instance to restore', 'positional'))
     def restore(self, domain, archive):
         """ Restore an instance using a pre-created archive """
         self.api.execute_sync_task('put', self.get_url(domain),
                                    {'action': 'restore',
                                     'archive': archive})
+    @plac.annotations(
+        domain=('The instance to delete', 'positional'),
+        disable=('Disable instance before deleting', 'flag', 'd'),
+    )
+    def delete(self, domain, disable=False):
+        """ Delete the selected instance """
+        if disable:
+            self.disable(domain)
+        self.api.execute_sync_task('delete', self.get_url(domain))
