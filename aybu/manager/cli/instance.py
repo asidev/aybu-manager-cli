@@ -44,7 +44,7 @@ class InstanceInterface(BaseInterface):
             environment_name=environment,
             owner_email=owner,
             technical_contact_email=technical_contact,
-            theme=theme,
+            theme_name=theme,
             default_language=default_language,
             verbose='true' if verbose else '',
             enabled='true' if not disabled else '')
