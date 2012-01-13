@@ -30,24 +30,26 @@ class InstanceInterface(BaseInterface):
         domain=('Domain to deploy', 'positional', None),
         environment=('Env to deploy to', 'positional'),
         owner=('Owner of the instance', 'positional'),
-        technical_contact=('Tech contact of the instance', 'positional'),
+        technical_contact=('Tech contact of the instance', 'option', 'c', str,
+                          None, 'EMAIL'),
         theme=('Theme name', 'option', 't', str, None, 'THEME_NAME'),
         default_language=('Default language for autoredirect', 'option', 'l'),
         disabled=('Mark the instance as disabled once deployed', 'flag', 'd'),
         verbose=('Enable debugging messages', 'flag', 'v')
     )
-    def deploy(self, domain, environment, owner, technical_contact,
+    def deploy(self, domain, environment, owner, technical_contact=None,
                theme='', default_language='it', disabled=False, verbose=False):
         """ deploy a new instance for a given domain. """
         data=dict(
             domain=domain,
             environment_name=environment,
             owner_email=owner,
-            technical_contact_email=technical_contact,
             theme_name=theme,
             default_language=default_language,
             verbose='true' if verbose else '',
             enabled='true' if not disabled else '')
+        if technical_contact:
+            data['technical_contact_email'] = technical_contact,
         self.api.execute_sync_task('post', self.root_url, data=data)
 
     @plac.annotations(domain=('The instance to enable', 'positional'))
