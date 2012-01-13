@@ -31,8 +31,7 @@ class UserInterface(BaseInterface):
     name = 'users'
 
     @plac.annotations(
-        email=('User email. It will be used as username (required)', 'option',
-               'e', str, None, 'EMAIL'),
+        email=('User email. It will be used as username', 'positional'),
         password=('User password (required)', 'option', 'p', str, None, 'PWD'),
         name=('User first name (required)', 'option', 'n', str, None, 'NAME'),
         surname=('User surname (required)', 'option', 's', str, None, 'SURNAME'),
@@ -92,9 +91,9 @@ class UserInterface(BaseInterface):
         self.api.post(self.get_url(), data)
 
     @plac.annotations(
-        user_email=('User to update', 'option', '-e', str, None, 'EMAIL')
+        email=('User to update', 'positional')
     )
-    def update(self, user_email, *attribute):
+    def update(self, email, *attribute):
         """
         Update an user data. Attributes are the same as in users_create
         command, and they must be in the form arg=value
@@ -109,7 +108,7 @@ class UserInterface(BaseInterface):
         if 'groups' in data:
             data['groups'] = comma_sep_to_list(data['groups'])
 
-        response, content = self.api.put(self.get_url(user_email), data=data)
+        response, content = self.api.put(self.get_url(email), data=data)
 
         if content:
             for k,v in content.iteritems():
