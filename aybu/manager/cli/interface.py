@@ -105,7 +105,19 @@ class BaseInterface(object):
             return
 
         for attr in sorted(content.keys()):
-            print "{}{:<20}: {}".format(prompt, attr, content[attr])
+            if attr.startswith("__"):
+                continue
+            if isinstance(content[attr], basestring):
+                value = content[attr]
+            else:
+                try:
+                    value = ', '.join(content[attr])
+
+                except TypeError:
+                    value = content[attr]
+
+
+            print "{}{:<20}: {}".format(prompt, attr, value)
 
     @plac.annotations(
         full=('Get complete output', 'flag', 'f'),
