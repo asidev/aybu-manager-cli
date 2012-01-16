@@ -17,12 +17,26 @@ limitations under the License.
 """
 
 from . interface import BaseInterface
+from collections import OrderedDict
 
 
 class TaskInterface(BaseInterface):
 
     commands = ['list', 'logs', 'delete', 'flush', 'info', 'flush_logs']
     name = 'tasks'
+
+    def list(self, full=False, verbose=False):
+        quiet = not verbose
+        response, content = self.api.get(self.root_url, quiet=quiet)
+        content = content or {}
+        ordered = OrderedDict(sorted(content.items(),
+                                     key=lambda x: x[1]['requested']))
+        for uid, data in ordered.iteritems():
+            print " * {} [{} - {}]".format(uid, data['requested'],
+                                           data['status'])
+            if full:
+                self.print_info(data, prompt='   > ')
+
 
     def logs(self, task):
         response, content = self.api.get(self.get_url(task, 'logs'))
