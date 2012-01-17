@@ -23,7 +23,7 @@ from . interface import BaseInterface
 class InstanceInterface(BaseInterface):
 
     commands = ['list', 'deploy', 'delete', 'enable', 'disable', 'flush',
-                'reload', 'delete', 'archive', 'restore', 'info']
+                'switch_env', 'reload', 'delete', 'archive', 'restore', 'info']
     name = 'instances'
 
     @plac.annotations(
@@ -110,3 +110,12 @@ class InstanceInterface(BaseInterface):
         if disable:
             self.disable(domain)
         self.api.execute_sync_task('delete', self.get_url(domain))
+
+    @plac.annotations(
+        domain=('The instance to modify', 'positional'),
+        environment=('The new environment to switch to', 'positional')
+    )
+    def switch_env(self, domain, environment):
+        self.api.execute_sync_task('put', self.get_url(domain),
+                                   {'action': 'switch_environment',
+                                    'environment': environment})
