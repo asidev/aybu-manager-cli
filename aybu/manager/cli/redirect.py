@@ -62,3 +62,21 @@ class RedirectInterface(BaseInterface):
 
         self.api.put(self.get_url(source), params)
 
+    @plac.annotations(
+        full=('Get complete output', 'flag', 'f'),
+        verbose=('Be verbose', 'flag', 'v')
+    )
+    def list(self, full=False, verbose=False):
+        quiet = not verbose
+        response, content = self.api.get(self.root_url, quiet=quiet)
+        content = content or {}
+
+        if not full:
+            for source, data in content.iteritems():
+                print " • {source} => {destination}{target_path} [{http_code}]"\
+                        .format(**data)
+        else:
+            for source, data in content.iteritems():
+                print " • {}:".format(source)
+                self.print_info(data, prompt='   ° ')
+
