@@ -23,7 +23,8 @@ from . interface import BaseInterface
 class InstanceInterface(BaseInterface):
 
     commands = ['list', 'deploy', 'delete', 'enable', 'disable', 'flush',
-                'switch_env', 'reload', 'delete', 'archive', 'restore', 'info']
+                'switch_env', 'reload', 'delete', 'archive', 'restore', 'info',
+                'migrate']
     name = 'instances'
 
     @plac.annotations(
@@ -119,3 +120,16 @@ class InstanceInterface(BaseInterface):
         self.api.execute_sync_task('put', self.get_url(domain),
                                    {'action': 'switch_environment',
                                     'environment': environment})
+
+    @plac.annotations(
+        domain=('The instance to migrate', 'positional'),
+        revision=('Schema revision to migrate to', 'option', 'm', str, None,
+                  'REV')
+    )
+    def migrate(self, domain, revision='head'):
+        self.api.execute_sync_task('put', self.get_url(domain),
+                                   {'action': 'migrate',
+                                    'revision': revision})
+
+
+
