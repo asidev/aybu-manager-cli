@@ -16,6 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import plac
 from . interface import BaseInterface
 
 
@@ -24,6 +25,11 @@ class EnvironmentInterface(BaseInterface):
     name = 'envs'
     root_url = '/environments'
 
+    @plac.annotations(
+        name=('Environment name', 'positional'),
+        venv_name=('Virtualenv name to associate to this env.', 'option',
+                   'e', str, None, 'VENV')
+    )
     def create(self, name, venv_name=None):
         data = dict(name=name)
         if venv_name:
@@ -33,3 +39,10 @@ class EnvironmentInterface(BaseInterface):
 
     def rename(self, name, newname):
         self.api.put(self.get_url(name), {'name': newname})
+
+    @plac.annotations(
+        name=('Name of the environment to delete', 'positional')
+    )
+    def delete(self, name):
+        """ Delete the selected instance """
+        self.api.execute_sync_task('delete', self.get_url(name))
