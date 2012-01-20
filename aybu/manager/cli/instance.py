@@ -18,6 +18,7 @@ limitations under the License.
 
 import plac
 from . interface import BaseInterface
+from . archive import ArchiveInterface
 
 
 class InstanceInterface(BaseInterface):
@@ -90,18 +91,31 @@ class InstanceInterface(BaseInterface):
         self.api.execute_sync_task('put', self.get_url(domain),
                                    {'action': 'sentence'})
 
-    @plac.annotations(domain=('The instance to archive', 'positional'))
-    def archive(self, domain):
+    @plac.annotations(
+        domain=('The instance to archive', 'positional'),
+        name=('Archive name', 'option', 'n')
+    )
+    def archive(self, domain, name=None):
         """ Create an archive of an instance. """
-        self.api.execute_sync_task('put', self.get_url(domain),
-                                   {'action': 'restore'})
+        archives_url = "/{}".format(ArchiveInterface.name)
+        params = dict(domain=domain)
+        if name:
+            params['name'] = name
+        self.api.execute_sync_task('post', archives_url, params)
 
-    @plac.annotations(domain=('The instance to restore', 'positional'))
-    def restore(self, domain, archive):
+    @plac.annotations(
+        domain=('The instance to restore', 'positional'),
+        archive_file=('Archive from file', 'option', 'f', str, None, 'FILE'),
+        archive=('Archive name', 'option', 'n', str, None, 'NAME')
+    )
+    def restore(self, domain, archive_file=None, archive=None):
         """ Restore an instance using a pre-created archive """
-        self.api.execute_sync_task('put', self.get_url(domain),
-                                   {'action': 'restore',
-                                    'archive': archive})
+        params = dict(action='restore')
+        # TODO handle archive upload
+        if archive:
+            params['archive'] = archive
+        self.api.execute_sync_task('post', self.get_url(domain), params)
+
     @plac.annotations(
         domain=('The instance to delete', 'positional'),
         disable=('Disable instance before deleting', 'flag', 'd'),
