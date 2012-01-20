@@ -41,7 +41,7 @@ class InstanceInterface(BaseInterface):
     def deploy(self, domain, environment, owner, technical_contact=None,
                theme='', default_language='it', disabled=False, verbose=False):
         """ deploy a new instance for a given domain. """
-        data=dict(
+        data = dict(
             domain=domain,
             environment_name=environment,
             owner_email=owner,
