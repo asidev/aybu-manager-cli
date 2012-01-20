@@ -28,6 +28,7 @@ from . theme import ThemeInterface
 from . group import GroupInterface
 from . user import UserInterface
 from . redirect import RedirectInterface
+from . archive import ArchiveInterface
 from . client import AybuManagerClient
 from . autocomplete import AybuManagerCliReadline
 
@@ -36,7 +37,7 @@ class AybuManagerCliInterface(object):
 
     interfaces = (InstanceInterface, TaskInterface, EnvironmentInterface,
                   ThemeInterface, GroupInterface, UserInterface,
-                  RedirectInterface)
+                  RedirectInterface, ArchiveInterface)
     interface_instances = {}
     commands = set(('exit', 'quit', 'help_commands'))
 

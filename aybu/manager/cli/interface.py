@@ -99,7 +99,6 @@ class BaseInterface(object):
         else:
             return content.keys()
 
-
     def print_info(self, content, prompt=''):
         if not content:
             return
