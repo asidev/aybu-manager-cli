@@ -18,12 +18,14 @@ limitations under the License.
 
 import plac
 from . interface import BaseInterface
+from . archive import ArchiveInterface
 
 
 class InstanceInterface(BaseInterface):
 
     commands = ['list', 'deploy', 'delete', 'enable', 'disable', 'flush',
-                'reload', 'delete', 'archive', 'restore', 'info']
+                'switch_env', 'reload', 'delete', 'archive', 'restore', 'info',
+                'migrate']
     name = 'instances'
 
     @plac.annotations(
@@ -40,7 +42,7 @@ class InstanceInterface(BaseInterface):
     def deploy(self, domain, environment, owner, technical_contact=None,
                theme='', default_language='it', disabled=False, verbose=False):
         """ deploy a new instance for a given domain. """
-        data=dict(
+        data = dict(
             domain=domain,
             environment_name=environment,
             owner_email=owner,
@@ -89,18 +91,31 @@ class InstanceInterface(BaseInterface):
         self.api.execute_sync_task('put', self.get_url(domain),
                                    {'action': 'sentence'})
 
-    @plac.annotations(domain=('The instance to archive', 'positional'))
-    def archive(self, domain):
+    @plac.annotations(
+        domain=('The instance to archive', 'positional'),
+        name=('Archive name', 'option', 'n')
+    )
+    def archive(self, domain, name=None):
         """ Create an archive of an instance. """
-        self.api.execute_sync_task('put', self.get_url(domain),
-                                   {'action': 'restore'})
+        archives_url = "/{}".format(ArchiveInterface.name)
+        params = dict(domain=domain)
+        if name:
+            params['name'] = name
+        self.api.execute_sync_task('post', archives_url, params)
 
-    @plac.annotations(domain=('The instance to restore', 'positional'))
-    def restore(self, domain, archive):
+    @plac.annotations(
+        domain=('The instance to restore', 'positional'),
+        archive_file=('Archive from file', 'option', 'f', str, None, 'FILE'),
+        archive=('Archive name', 'option', 'n', str, None, 'NAME')
+    )
+    def restore(self, domain, archive_file=None, archive=None):
         """ Restore an instance using a pre-created archive """
-        self.api.execute_sync_task('put', self.get_url(domain),
-                                   {'action': 'restore',
-                                    'archive': archive})
+        params = dict(action='restore')
+        # TODO handle archive upload
+        if archive:
+            params['archive'] = archive
+        self.api.execute_sync_task('post', self.get_url(domain), params)
+
     @plac.annotations(
         domain=('The instance to delete', 'positional'),
         disable=('Disable instance before deleting', 'flag', 'd'),
@@ -110,3 +125,25 @@ class InstanceInterface(BaseInterface):
         if disable:
             self.disable(domain)
         self.api.execute_sync_task('delete', self.get_url(domain))
+
+    @plac.annotations(
+        domain=('The instance to modify', 'positional'),
+        environment=('The new environment to switch to', 'positional')
+    )
+    def switch_env(self, domain, environment):
+        self.api.execute_sync_task('put', self.get_url(domain),
+                                   {'action': 'switch_environment',
+                                    'environment': environment})
+
+    @plac.annotations(
+        domain=('The instance to migrate', 'positional'),
+        revision=('Schema revision to migrate to', 'option', 'm', str, None,
+                  'REV')
+    )
+    def migrate(self, domain, revision='head'):
+        self.api.execute_sync_task('put', self.get_url(domain),
+                                   {'action': 'migrate',
+                                    'revision': revision})
+
+
+

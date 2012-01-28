@@ -16,13 +16,37 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
+import plac
 from . interface import BaseInterface
+from collections import OrderedDict
 
 
 class TaskInterface(BaseInterface):
 
     commands = ['list', 'logs', 'delete', 'flush', 'info', 'flush_logs']
     name = 'tasks'
+
+    @plac.annotations(
+        full=('Get complete output', 'flag', 'f'),
+        verbose=('Be verbose', 'flag', 'v')
+    )
+    def list(self, full=False, verbose=False):
+        quiet = not verbose
+        response, content = self.api.get(self.root_url, quiet=quiet)
+        content = content or {}
+        ordered = OrderedDict(sorted(content.items(),
+                                    key=lambda x: x[1]['requested']))
+        if not full:
+            for uid, data in ordered.iteritems():
+                print " • {} <{}> [{} - {}]".format(uid,
+                                                    data['command'],
+                                                    data['requested'],
+                                                    data['status'])
+        else:
+            for uid, data in ordered.iteritems():
+                print " • {}:" .format(uid)
+                self.print_info(data, prompt='   ° ')
+
 
     def logs(self, task):
         response, content = self.api.get(self.get_url(task, 'logs'))

@@ -37,4 +37,3 @@ class GroupInterface(BaseInterface):
     )
     def rename(self, name, new_name):
         self.api.put(self.get_url(name), {'name': new_name})
-

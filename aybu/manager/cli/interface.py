@@ -99,25 +99,20 @@ class BaseInterface(object):
         else:
             return content.keys()
 
-
     def print_info(self, content, prompt=''):
         if not content:
             return
+        max_len = max({len(k) for k in content})
+        max_len = 30 if max_len < 30 else max_len
+        format_string = "{}{:<%d}: {}" % (max_len)
 
         for attr in sorted(content.keys()):
-            if attr.startswith("__"):
+            key = attr
+            if key.startswith("__"):
                 continue
-            if isinstance(content[attr], basestring):
-                value = content[attr]
-            else:
-                try:
-                    value = ', '.join(content[attr])
-
-                except TypeError:
-                    value = content[attr]
-
-
-            print "{}{:<20}: {}".format(prompt, attr, value)
+            if attr.startswith("_"):
+                key = attr[1:]
+            print format_string.format(prompt, key, content[attr])
 
     @plac.annotations(
         full=('Get complete output', 'flag', 'f'),
@@ -128,9 +123,9 @@ class BaseInterface(object):
         response, content = self.api.get(self.root_url, quiet=quiet)
         content = content or {}
         for res in sorted(content):
-            print " * {}".format(res)
+            print " • {}".format(res)
             if full:
-                self.print_info(content[res], prompt='   > ')
+                self.print_info(content[res], prompt='   ° ')
 
     @plac.annotations(
         resource=('The resource to operate on', 'positional')
