@@ -96,7 +96,7 @@ class AybuManagerCliInterface(object):
 
 def main():
     try:
-        histfile = os.path.expanduser('~/{}.history'.format(__name__))
+        histfile = os.path.expanduser('~/.{}.history'.format(__name__))
         completer = AybuManagerCliReadline(histfile=histfile,
                                            factory=AybuManagerCliInterface)
         plac.Interpreter.call(AybuManagerCliInterface,
