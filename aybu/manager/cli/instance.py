@@ -119,12 +119,15 @@ class InstanceInterface(BaseInterface):
     @plac.annotations(
         domain=('The instance to delete', 'positional'),
         disable=('Disable instance before deleting', 'flag', 'd'),
+        noarchive=('Do not archive before deleting', 'flag', 'n')
     )
-    def delete(self, domain, disable=False):
+    def delete(self, domain, disable=False, noarchive=False):
         """ Delete the selected instance """
         if disable:
             self.disable(domain)
-        self.api.execute_sync_task('delete', self.get_url(domain))
+        params = {'archive': 'true' if not noarchive else ''}
+        self.api.execute_sync_task('delete', self.get_url(domain),
+                                   data=params)
 
     @plac.annotations(
         domain=('The instance to modify', 'positional'),
@@ -132,8 +135,8 @@ class InstanceInterface(BaseInterface):
     )
     def switch_env(self, domain, environment):
         self.api.execute_sync_task('put', self.get_url(domain),
-                                   {'action': 'switch_environment',
-                                    'environment': environment})
+                                   data={'action': 'switch_environment',
+                                         'environment': environment})
 
     @plac.annotations(
         domain=('The instance to migrate', 'positional'),
