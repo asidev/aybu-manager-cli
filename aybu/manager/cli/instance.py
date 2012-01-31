@@ -58,38 +58,38 @@ class InstanceInterface(BaseInterface):
     def enable(self, domain):
         """ Reenable a previously disabled instance """
         self.api.execute_sync_task('put', self.get_url(domain),
-                                   {'action': 'enable'})
+                                   data={'action': 'enable'})
 
     @plac.annotations(domain=('The instance to disable', 'positional'))
     def disable(self, domain):
         """ Disable an instance, i.e. it stops the vassal but keep data and db
             in place"""
         self.api.execute_sync_task('put', self.get_url(domain),
-                                   {'action': 'disable'})
+                                   data={'action': 'disable'})
 
     @plac.annotations(domain=('The instance to flush', 'positional'))
     def flush(self, domain):
         """ Flush cache for an instance """
         self.api.execute_sync_task('put', self.get_url(domain),
-                                   {'action': 'flush_cache'})
+                                   data={'action': 'flush_cache'})
 
     @plac.annotations(domain=('The instance to reload', 'positional'))
     def reload(self, domain):
         """ Reload the vassal for an instance """
         self.api.execute_sync_task('put', self.get_url(domain),
-                                   {'action': 'reload'})
+                                   data={'action': 'reload'})
 
     @plac.annotations(domain=('The instance to kill', 'positional'))
     def kill(self, domain):
         """ Kill an instance's vassal sending SIGTERM to the process """
         self.api.execute_sync_task('put', self.get_url(domain),
-                                   {'action': 'kill'})
+                                   data={'action': 'kill'})
 
     @plac.annotations(domain=('The instance to kill', 'positional'))
     def sentence(self, domain):
         """ Kill an instance's vassal sending a SIGKILL to the process """
         self.api.execute_sync_task('put', self.get_url(domain),
-                                   {'action': 'sentence'})
+                                   data={'action': 'sentence'})
 
     @plac.annotations(
         domain=('The instance to archive', 'positional'),
@@ -101,7 +101,7 @@ class InstanceInterface(BaseInterface):
         params = dict(domain=domain)
         if name:
             params['name'] = name
-        self.api.execute_sync_task('post', archives_url, params)
+        self.api.execute_sync_task('post', archives_url, data=params)
 
     @plac.annotations(
         domain=('The instance to restore', 'positional'),
@@ -114,7 +114,7 @@ class InstanceInterface(BaseInterface):
         # TODO handle archive upload
         if archive:
             params['archive'] = archive
-        self.api.execute_sync_task('post', self.get_url(domain), params)
+        self.api.execute_sync_task('post', self.get_url(domain), data=params)
 
     @plac.annotations(
         domain=('The instance to delete', 'positional'),
@@ -144,6 +144,3 @@ class InstanceInterface(BaseInterface):
         self.api.execute_sync_task('put', self.get_url(domain),
                                    {'action': 'migrate',
                                     'revision': revision})
-
-
-
