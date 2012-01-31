@@ -16,7 +16,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 """
 
-
+import ast
 import ConfigParser
 import json
 import logging
@@ -33,7 +33,7 @@ class AybuManagerClient(object):
 
     def __init__(self, host, subscription_addr,
                  username=None, password=None, timeout=None,
-                 debug=False):
+                 debug=False, verify_ssl=False):
 
         self.host = host
         self.username = username
@@ -48,6 +48,7 @@ class AybuManagerClient(object):
                          else (username, password)
         self.timeout = timeout
         self.debug = debug
+        self.verify_ssl = verify_ssl
         if debug:
             print "Created client for {} (user: {}, subscription: {})"\
                     .format(self.host, self.username, self.sub_addr)
@@ -57,7 +58,8 @@ class AybuManagerClient(object):
         return httplib.responses[status_code]
 
     @classmethod
-    def create_from_config(cls, configfile, debug=False, overrides={}):
+    def create_from_config(cls, configfile, debug=False,
+                           overrides={}):
         config = ConfigParser.ConfigParser()
         try:
             with open(configfile) as f:
@@ -69,12 +71,20 @@ class AybuManagerClient(object):
 
         kwargs = {'debug': debug}
         for var in ('username', 'password', 'host', 'subscription_addr',
-                    'timeout'):
+                    'timeout', 'verify_ssl'):
             try:
                 kwargs[var] = config.get('remote', var, vars=overrides)
+                if var == 'verify_ssl':
+                    kwargs[var] = ast.literal_eval(kwargs[var])
+
+            except ValueError:
+                print "{} has invalid value {}, assuming None"\
+                      .format(var, kwargs[var])
+                del kwargs[var]
+
             except:
                 if var in ('host', 'subscription_addr'):
-                    log.critical("No variable '%s' for api client.".format(var))
+                    log.critical("No variable '%s' for api client.", var)
                     raise TypeError('Missing configuration for {}'.format(var))
 
         obj = cls(**kwargs)
@@ -82,7 +92,9 @@ class AybuManagerClient(object):
         return obj
 
     def uuid(self):
-        uuid = '{}.{}-{}'.format(platform.uname()[1], os.getpid(), self.counter)
+        uuid = '{}.{}-{}'.format(platform.uname()[1],
+                                 os.getpid(),
+                                 self.counter)
         self.zmq_response_socket.setsockopt(zmq.SUBSCRIBE, uuid)
         return uuid
 
@@ -100,6 +112,7 @@ class AybuManagerClient(object):
         auth = kwargs.pop('auth', self.auth_info)
         timeout = kwargs.pop('timeout', self.timeout)
         kwargs.update(dict(timeout=timeout, auth=auth))
+        kwargs.update(dict(verify=self.verify_ssl))
 
         quiet = kwargs.pop('quiet', False)
         debug = self.debug or kwargs.pop('debug', False)
@@ -107,14 +120,12 @@ class AybuManagerClient(object):
         if debug:
             quiet = False
 
-#        if not quiet:
-#            log.info("%s %s", method.upper(), url)
-
         try:
             response = requests.request(method, url, *args, **kwargs)
 
         except requests.exceptions.RequestException as e:
-            print "Error connection to API: {} - {}".format(type(e).__name__, e)
+            print "Error connection to API: {} - {}"\
+                    .format(type(e).__name__, e)
             return None, None
 
         try:
