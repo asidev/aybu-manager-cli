@@ -32,20 +32,20 @@ class ThemeInterface(BaseInterface):
         return int(w), int(h)
 
     @plac.annotations(
-        name=('Theme name', 'option', '-t', str, None, 'NAME'),
-        author=('Theme author email', 'option', '-a', str, None, 'EMAIL'),
-        owner=('Theme owner email', 'option', '-o', str, None, 'EMAIL'),
-        banner_size=('Banner WxH sizes (i.e 920x240)', 'option', '-b', str,
+        name=('Theme name', 'option', 't', str, None, 'NAME'),
+        author=('Theme author email', 'option', 'a', str, None, 'EMAIL'),
+        owner=('Theme owner email', 'option', 'o', str, None, 'EMAIL'),
+        banner_size=('Banner WxH sizes (i.e 920x240)', 'option', 'b', str,
                        None, 'WIDTHxHEIGHT'),
-        logo_size=('Logo WxH sizes (i.e 100x40)', 'option', '-l', str,
+        logo_size=('Logo WxH sizes (i.e 100x40)', 'option', 'l', str,
                        None, 'WIDTHxHEIGHT'),
-        main_menu_levels= ('Main menu levels', 'option', '-L', int, None, 'NUM'),
-        template_levels=('Max template levels', 'option', '-T', int, None,
+        main_menu_levels= ('Main menu levels', 'option', 'L', int, None, 'NUM'),
+        template_levels=('Max template levels', 'option', 'T', int, None,
                          'NUM'),
-        image_width=('Image "full" width in pixels', 'option', '-I', str,
+        image_width=('Image "full" width in pixels', 'option', 'I', str,
                          None, 'WIDTH'),
-        version=('Theme version', 'option', '-V', str, None, 'VERSION'),
-        parent=('Parent theme name (must exists)', 'option', '-p', str, None,
+        version=('Theme version', 'option', 'V', str, None, 'VERSION'),
+        parent=('Parent theme name (must exists)', 'option', 'p', str, None,
                 'NAME')
     )
     def create(self, name, author, owner, banner_size, logo_size,
