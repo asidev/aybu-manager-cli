@@ -39,7 +39,7 @@ class ThemeInterface(BaseInterface):
                        None, 'WIDTHxHEIGHT'),
         logo_size=('Logo WxH sizes (i.e 100x40)', 'option', 'l', str,
                        None, 'WIDTHxHEIGHT'),
-        main_menu_levels= ('Main menu levels', 'option', 'L', int, None, 'NUM'),
+        main_menu_levels=('Main menu levels', 'option', 'L', int, None, 'NUM'),
         template_levels=('Max template levels', 'option', 'T', int, None,
                          'NUM'),
         image_width=('Image "full" width in pixels', 'option', 'I', str,
