@@ -59,7 +59,7 @@ class ThemeInterface(BaseInterface):
                     owner=owner,
                     banner_width=banner_width,
                     banner_height=banner_height,
-                    logo_widht=logo_width,
+                    logo_width=logo_width,
                     logo_height=logo_height,
                     main_menu_levels=main_menu_levels,
                     template_levels=template_levels,
