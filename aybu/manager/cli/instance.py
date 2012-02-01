@@ -24,8 +24,8 @@ from . archive import ArchiveInterface
 class InstanceInterface(BaseInterface):
 
     commands = ['list', 'deploy', 'delete', 'enable', 'disable', 'flush',
-                'switch_env', 'reload', 'delete', 'archive', 'restore', 'info',
-                'migrate']
+                'switch_env', 'reload', 'reload_all', 'delete', 'archive',
+                'restore', 'info', 'migrate']
     name = 'instances'
 
     @plac.annotations(
@@ -77,6 +77,11 @@ class InstanceInterface(BaseInterface):
     def reload(self, domain):
         """ Reload the vassal for an instance """
         self.api.execute_sync_task('put', self.get_url(domain),
+                                   data={'action': 'reload'})
+
+    def reload_all(self):
+        """ Reload all instances at once"""
+        self.api.execute_sync_task('put', self.root_url,
                                    data={'action': 'reload'})
 
     @plac.annotations(domain=('The instance to kill', 'positional'))
