@@ -20,7 +20,7 @@ setup(name='aybu-manager-cli',
       install_requires=(
           'plac',
           'pyzmq',
-          'requests',
+          'requests>=0.10',
       ),
       entry_points = """\
       [console_scripts]
