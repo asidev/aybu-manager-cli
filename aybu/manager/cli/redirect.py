@@ -19,6 +19,7 @@ limitations under the License.
 import plac
 from . interface import BaseInterface
 
+
 class RedirectInterface(BaseInterface):
 
     commands = ['list', 'create', 'edit', 'info', 'delete']
@@ -41,7 +42,7 @@ class RedirectInterface(BaseInterface):
         if target_path:
             params['target_path'] = target_path
 
-        self.api.post(self.get_url(), params)
+        self.api.execute_sync_task('post', self.root_url, data=params)
 
     @plac.annotations(
         source=('Source domain to redirect', 'positional', None, str, None,
@@ -60,7 +61,14 @@ class RedirectInterface(BaseInterface):
         if not target_path is None:
             params['target_path'] = target_path
 
-        self.api.put(self.get_url(source), params)
+        self.api.execute_sync_task('put', self.get_url(source), data=params)
+
+    @plac.annotations(
+        source=('The redirect to delete', 'positional')
+    )
+    def delete(self, source):
+        """ Delete the selected resource """
+        self.api.execute_sync_task('delete', self.get_url(source))
 
     @plac.annotations(
         full=('Get complete output', 'flag', 'f'),
@@ -79,4 +87,3 @@ class RedirectInterface(BaseInterface):
             for source, data in content.iteritems():
                 print " • {}:".format(source)
                 self.print_info(data, prompt='   ° ')
-
