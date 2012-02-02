@@ -24,8 +24,9 @@ from . archive import ArchiveInterface
 class InstanceInterface(BaseInterface):
 
     commands = ['list', 'deploy', 'delete', 'enable', 'disable', 'flush',
-                'switch_env', 'reload', 'reload_all', 'delete', 'archive',
-                'restore', 'info', 'migrate']
+                'switch_env', 'reload', 'reload_all', 'rewrite', 'rewrite_all',
+                'delete', 'archive', 'restore', 'info', 'migrate', 'kill',
+                'force_reload']
     name = 'instances'
 
     @plac.annotations(
@@ -84,17 +85,32 @@ class InstanceInterface(BaseInterface):
         self.api.execute_sync_task('put', self.root_url,
                                    data={'action': 'reload'})
 
-    @plac.annotations(domain=('The instance to kill', 'positional'))
-    def kill(self, domain):
+    @plac.annotations(domain=('The instance to rewrite', 'positional'))
+    def rewrite(self, domain):
+        """ Rewrite instance config (thus reloading the uwsgi vassal) """
+        self.api.execute_sync_task('put', self.get_url(domain),
+                                   data={'action': 'rewrite'})
+
+    def rewrite_all(self):
+        """ Rewrite all instances at once"""
+        self.api.execute_sync_task('put', self.root_url,
+                                   data={'action': 'rewrite'})
+
+    @plac.annotations(
+        domain=('The instance to kill', 'positional'),
+    )
+    def force_reload(self, domain):
         """ Kill an instance's vassal sending SIGTERM to the process """
         self.api.execute_sync_task('put', self.get_url(domain),
-                                   data={'action': 'kill'})
+                                   data={'action': 'reload',
+                                         'force': 'true'})
 
     @plac.annotations(domain=('The instance to kill', 'positional'))
-    def sentence(self, domain):
+    def kill(self, domain):
         """ Kill an instance's vassal sending a SIGKILL to the process """
         self.api.execute_sync_task('put', self.get_url(domain),
-                                   data={'action': 'sentence'})
+                                   data={'action': 'reload',
+                                         'kill': 'true'})
 
     @plac.annotations(
         domain=('The instance to archive', 'positional'),
