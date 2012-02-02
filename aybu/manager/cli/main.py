@@ -29,6 +29,7 @@ from . group import GroupInterface
 from . user import UserInterface
 from . redirect import RedirectInterface
 from . archive import ArchiveInterface
+from . alias import AliasInterface
 from . client import AybuManagerClient
 from . autocomplete import AybuManagerCliReadline
 
@@ -37,7 +38,7 @@ class AybuManagerCliInterface(object):
 
     interfaces = (InstanceInterface, TaskInterface, EnvironmentInterface,
                   ThemeInterface, GroupInterface, UserInterface,
-                  RedirectInterface, ArchiveInterface)
+                  RedirectInterface, ArchiveInterface, AliasInterface)
     interface_instances = {}
     commands = set(('exit', 'quit', 'help_commands'))
 
@@ -63,8 +64,9 @@ class AybuManagerCliInterface(object):
         self.log.setLevel(self.loglevel)
         self.log.addHandler(logging.StreamHandler())
         try:
-            self.api_client = AybuManagerClient.create_from_config(self.configfile,
-                                                                debug=verbose)
+            self.api_client = AybuManagerClient.create_from_config(
+                                                            self.configfile,
+                                                            debug=verbose)
         except:
             sys.exit()
 
@@ -103,5 +105,3 @@ def main():
                               stdin=completer, verbose=True, prompt='aybu> ')
     except KeyboardInterrupt:
         print "interrupted"
-
-
