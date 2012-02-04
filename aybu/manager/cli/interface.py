@@ -35,7 +35,8 @@ class BaseInterface(object):
 
     def get_completions(self, command, parts):
         """ This function get called during autocompletion.
-            command is the command name, i.e. tasks_list <TAB> call this function
+            command is the command name, i.e.
+            tasks_list <TAB> call this function
             on TaskInterface with "list" as command.
             parts is a list of kw to complete against
         """
@@ -144,5 +145,3 @@ class BaseInterface(object):
     def delete(self, resource):
         """ Delete the selected resource """
         self.api.delete(self.get_url(resource), quiet=False)
-
-
