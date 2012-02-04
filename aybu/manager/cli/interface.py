@@ -112,7 +112,10 @@ class BaseInterface(object):
                 continue
             if attr.startswith("_"):
                 key = attr[1:]
-            print format_string.format(prompt, key, content[attr])
+            cont = content[attr]
+            if isinstance(cont, list):
+                cont = ", ".join(cont)
+            print format_string.format(prompt, key, cont)
 
     @plac.annotations(
         full=('Get complete output', 'flag', 'f'),
