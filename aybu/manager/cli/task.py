@@ -38,13 +38,13 @@ class TaskInterface(BaseInterface):
                                     key=lambda x: x[1]['requested']))
         if not full:
             for uid, data in ordered.iteritems():
-                print " • {} <{}> [{} - {}]".format(uid,
+                self.log.info(" • {} <{}> [{} - {}]".format(uid,
                                                     data['command'],
                                                     data['requested'],
-                                                    data['status'])
+                                                    data['status']))
         else:
             for uid, data in ordered.iteritems():
-                print " • {}:" .format(uid)
+                self.log.info(" • {}:" .format(uid))
                 self.print_info(data, prompt='   ° ')
 
 

@@ -18,11 +18,14 @@ limitations under the License.
 
 import plac
 import inspect
+import logging
 
 
 class BaseInterface(object):
 
     def __init__(self, client, main_interface):
+        self.log = logging.getLogger('aybu.manager.cli.{}'\
+                                    .format(self.__class__.__name__))
         self.api = client
         self.main = main_interface
         if not hasattr(self, 'root_url'):
@@ -115,8 +118,8 @@ class BaseInterface(object):
                 key = attr[1:]
             cont = content[attr]
             if isinstance(cont, list):
-                cont = ", ".join(cont)
-            print format_string.format(prompt, key, cont)
+                cont = ", ".join([str(e) for e in cont])
+            self.log.info(format_string.format(prompt, key, cont))
 
     @plac.annotations(
         full=('Get complete output', 'flag', 'f'),
@@ -127,7 +130,7 @@ class BaseInterface(object):
         response, content = self.api.get(self.root_url, quiet=quiet)
         content = content or {}
         for res in sorted(content):
-            print " • {}".format(res)
+            self.log.info(" • {}".format(res))
             if full:
                 self.print_info(content[res], prompt='   ° ')
 

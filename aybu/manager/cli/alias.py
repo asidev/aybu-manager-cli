@@ -69,4 +69,4 @@ class AliasInterface(BaseInterface):
         content = content or {}
 
         for domain, data in content.iteritems():
-            print " • {domain} => {destination}".format(**data)
+            self.log.info(" • {domain} => {destination}".format(**data))

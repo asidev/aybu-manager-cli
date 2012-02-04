@@ -30,6 +30,7 @@ log = logging.getLogger(__name__)
 
 
 class AybuManagerClient(object):
+    log = log
 
     def __init__(self, host, subscription_addr,
                  username=None, password=None, timeout=None,
@@ -50,8 +51,8 @@ class AybuManagerClient(object):
         self.debug = debug
         self.verify_ssl = verify_ssl
         if debug:
-            print "Created client for {} (user: {}, subscription: {})"\
-                    .format(self.host, self.username, self.sub_addr)
+            self.log.debug("Created client for {} (user: {}, sub: {})"\
+                    .format(self.host, self.username, self.sub_addr))
 
     @staticmethod
     def status_code_to_string(status_code):
@@ -78,8 +79,8 @@ class AybuManagerClient(object):
                     kwargs[var] = ast.literal_eval(kwargs[var])
 
             except ValueError:
-                print "{} has invalid value {}, assuming None"\
-                      .format(var, kwargs[var])
+                cls.log.error("{} has invalid value {}, assuming None"\
+                               .format(var, kwargs[var]))
                 del kwargs[var]
 
             except:
@@ -102,9 +103,9 @@ class AybuManagerClient(object):
         return "{}{}".format(self.host, path_info)
 
     def print_headers(self, headers):
-        print "Headers: "
+        self.log.debug("Headers: ")
         for h in sorted(headers):
-            print " {:<20}: {}".format(h.title(), headers[h])
+            self.log.debug(" {:<20}: {}".format(h.title(), headers[h]))
 
     def request(self, method, url, *args, **kwargs):
         url = self.url(url)
@@ -124,32 +125,31 @@ class AybuManagerClient(object):
             response = requests.request(method, url, *args, **kwargs)
 
         except requests.exceptions.RequestException as e:
-            print "Error connection to API: {} - {}"\
-                    .format(type(e).__name__, e)
+            self.log.critical("Error connection to API: {} - {}"\
+                               .format(type(e).__name__, e))
             return None, None
 
         try:
             response.raise_for_status()
 
         except Exception:
-            print "Error in response: {} {}".format(
+            self.log.error("Error in response: {} {}".format(
                         response.status_code,
-                        self.status_code_to_string(response.status_code))
+                        self.status_code_to_string(response.status_code)))
             if 'x-request-error' in response.headers:
-                print "Message: {}".format(response.headers['x-request-error'])
+                self.log.error("Message: {}"\
+                        .format(response.headers['x-request-error']))
 
-            if debug:
-                self.print_headers(response.headers)
+            self.print_headers(response.headers)
 
             return response, None
 
         else:
-            if debug:
-                self.print_headers(response.headers)
+            self.print_headers(response.headers)
 
             if not quiet:
-                print "OK {} {}".format(response.status_code,
-                             self.status_code_to_string(response.status_code))
+                self.log.info("OK {} {}".format(response.status_code,
+                            self.status_code_to_string(response.status_code)))
             try:
                 content = json.loads(response.content)
             except (AttributeError, ValueError):

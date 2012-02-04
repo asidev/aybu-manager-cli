@@ -34,7 +34,8 @@ class UserInterface(BaseInterface):
         email=('User email. It will be used as username', 'positional'),
         password=('User password (required)', 'option', 'p', str, None, 'PWD'),
         name=('User first name (required)', 'option', 'n', str, None, 'NAME'),
-        surname=('User surname (required)', 'option', 's', str, None, 'SURNAME'),
+        surname=('User surname (required)', 'option', 's', str, None,
+                 'SURNAME'),
         organization=('User company', 'option', 'o', str, None, 'COMPANY'),
         web=('User site address', 'option', 'a', str, None, 'HTTP_LINK'),
         twitter=('Username on twitter', 'option', 't', str, None, '@UNAME'),
@@ -64,7 +65,7 @@ class UserInterface(BaseInterface):
                                      not password or
                                      not name or
                                      not surname):
-            print "Missing required option"
+            self.log.error("Missing required option")
             return
 
         elif self.interactive:
@@ -111,5 +112,5 @@ class UserInterface(BaseInterface):
         response, content = self.api.put(self.get_url(email), data=data)
 
         if content:
-            for k,v in content.iteritems():
-                print "{:<20}: {}".format(k,v)
+            for k, v in content.iteritems():
+                self.log.info("{:<20}: {}".format(k, v))

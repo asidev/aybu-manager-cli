@@ -80,7 +80,7 @@ class AybuManagerCliInterface(object):
         "Will be called automatically at the end of the intepreter loop"
         if etype in (None, GeneratorExit):  # success
             if self._interact_:
-                print "exiting..."
+                self.log.info("exiting...")
 
     def exit(self):
         raise plac.Interpreter.Exit
@@ -89,11 +89,11 @@ class AybuManagerCliInterface(object):
         self.exit()
 
     def help_commands(self):
-        print " ".join([c for c in self.commands if c not in ("help",
+        self.log.info(" ".join([c for c in self.commands if c not in ("help",
                                                               "help_commands",
                                                               "exit",
                                                               ".last_tb",
-                                                              "quit")])
+                                                              "quit")]))
 
 
 def main():
