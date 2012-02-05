@@ -153,7 +153,7 @@ class AybuManagerClient(object):
                             self.status_code_to_string(response.status_code)))
             try:
                 content = json.loads(response.content)
-                if self.log.getEffectiveLevel() == logging.DEBUG:
+                if self.log.getEffectiveLevel() == logging.DEBUG and not quiet:
                     sys.stderr.write(json.dumps(content,
                                                 sort_keys=True,
                                                 indent=4))
@@ -163,7 +163,8 @@ class AybuManagerClient(object):
             except (AttributeError, ValueError) as e:
                 self.log.error("Cannot decode json: %s", e)
                 content = None
-
+            self.log.debug("response: %s", response)
+            self.log.debug("content: %s", content)
             return response, content
 
     def post(self, url, data, **kwargs):
