@@ -47,13 +47,13 @@ class TaskInterface(BaseInterface):
                 self.log.info(" • {}:" .format(uid))
                 self.print_info(data, prompt='   ° ')
 
-
     def logs(self, task):
+        """ Show tasks logs """
         response, content = self.api.get(self.get_url(task, 'logs'))
 
         if content:
             for log in content:
-                print log.strip()
+                self.log.info(log.strip())
 
     def flush(self):
         self.api.delete(self.root_url, quiet=False)

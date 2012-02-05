@@ -34,13 +34,24 @@ from . client import AybuManagerClient
 from . autocomplete import AybuManagerCliReadline
 
 
+def string_to_level(level):
+    try:
+        level = level.upper()
+        return getattr(logging, level)
+
+    except AttributeError:
+        sys.stderr.write('Cannot find logging level {}'.format(level))
+        sys.stderr.flush()
+        return None
+
+
 class AybuManagerCliInterface(object):
 
     interfaces = (InstanceInterface, TaskInterface, EnvironmentInterface,
                   ThemeInterface, GroupInterface, UserInterface,
                   RedirectInterface, ArchiveInterface, AliasInterface)
     interface_instances = {}
-    commands = set(('exit', 'quit', 'help_commands'))
+    commands = set(('exit', 'quit', 'help_commands', 'set_log_level'))
 
     def create_commands_for_interface(self, intf_cls):
         interface = intf_cls(self.api_client, self)
@@ -51,6 +62,24 @@ class AybuManagerCliInterface(object):
             self.__class__.commands.add(command_name)
 
     @plac.annotations(
+        level=('logging level to set', 'positional', None, string_to_level)
+    )
+    def set_log_level(self, level):
+        if level is None:
+            return
+        try:
+            if level == self.loglevel:
+                return
+            self.log
+
+        except AttributeError:
+            self.log = logging.getLogger('aybu')
+            self.log.addHandler(logging.StreamHandler())
+
+        self.loglevel = level
+        self.log.setLevel(self.loglevel)
+
+    @plac.annotations(
         configfile=('Path to the config file', 'option', "F"),
         verbose=('Be verbose', 'flag', 'V')
     )
@@ -59,10 +88,9 @@ class AybuManagerCliInterface(object):
         self.__doc__ = "\nUse help to see subcommands"
         self.configfile = configfile or '~/.aybu_manager_cli.conf'
         self.configfile = os.path.expanduser(self.configfile)
-        self.loglevel = logging.INFO if not verbose else logging.DEBUG
-        self.log = logging.getLogger('aybu')
-        self.log.setLevel(self.loglevel)
-        self.log.addHandler(logging.StreamHandler())
+        llevel = logging.INFO if not verbose else logging.DEBUG
+        self.set_log_level(llevel)
+
         try:
             self.api_client = AybuManagerClient.create_from_config(
                                                             self.configfile,

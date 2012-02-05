@@ -24,6 +24,7 @@ import os
 import platform
 import requests
 import httplib
+import sys
 import zmq
 
 log = logging.getLogger(__name__)
@@ -152,7 +153,15 @@ class AybuManagerClient(object):
                             self.status_code_to_string(response.status_code)))
             try:
                 content = json.loads(response.content)
+                if self.log.getEffectiveLevel() == logging.DEBUG:
+                    sys.stderr.write(json.dumps(content,
+                                                sort_keys=True,
+                                                indent=4))
+                    sys.stderr.write("\n\n")
+                    sys.stderr.flush()
+
             except (AttributeError, ValueError):
+                self.log.exception('aslkasl')
                 content = None
 
             return response, content
