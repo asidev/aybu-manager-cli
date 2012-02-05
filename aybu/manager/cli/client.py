@@ -163,8 +163,7 @@ class AybuManagerClient(object):
             except (AttributeError, ValueError) as e:
                 self.log.error("Cannot decode json: %s", e)
                 content = None
-            self.log.debug("response: %s", response)
-            self.log.debug("content: %s", content)
+
             return response, content
 
     def post(self, url, data, **kwargs):
@@ -234,4 +233,3 @@ class AybuManagerClient(object):
 
         except KeyboardInterrupt:
             pass
-
