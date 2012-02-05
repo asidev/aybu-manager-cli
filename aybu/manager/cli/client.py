@@ -160,8 +160,8 @@ class AybuManagerClient(object):
                     sys.stderr.write("\n\n")
                     sys.stderr.flush()
 
-            except (AttributeError, ValueError):
-                self.log.exception('aslkasl')
+            except (AttributeError, ValueError) as e:
+                self.log.error("Cannot decode json: %s", e)
                 content = None
 
             return response, content
