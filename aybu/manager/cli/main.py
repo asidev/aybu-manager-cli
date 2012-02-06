@@ -51,7 +51,8 @@ class AybuManagerCliInterface(object):
                   ThemeInterface, GroupInterface, UserInterface,
                   RedirectInterface, ArchiveInterface, AliasInterface)
     interface_instances = {}
-    commands = set(('exit', 'quit', 'help_commands', 'set_log_level'))
+    commands = set(('exit', 'quit', 'help_commands', 'set_log_level',
+                    'connect'))
 
     def create_commands_for_interface(self, intf_cls):
         interface = intf_cls(self.api_client, self)
@@ -80,22 +81,46 @@ class AybuManagerCliInterface(object):
         self.log.setLevel(self.loglevel)
 
     @plac.annotations(
+        remote=('remote API server', 'positional')
+    )
+    def connect(self, remote):
+        try:
+            api_client = AybuManagerClient.create_from_config(
+                                                        self.configfile,
+                                                        remote=remote,
+                                                        debug=self.verbose)
+
+        except Exception as e:
+            self.log.error('Cannot connect to %s: %s', remote, e)
+
+        else:
+            self.log.info("Created API client for %s", remote)
+            self.api_client = api_client
+            for intf in self.__class__.interface_instances.values():
+                intf.api = api_client
+
+    @plac.annotations(
         configfile=('Path to the config file', 'option', "F"),
+        remote=('Remote server to connect to', 'option', "R"),
         verbose=('Be verbose', 'flag', 'V')
     )
-    def __init__(self, configfile, verbose):
+    def __init__(self, configfile, verbose, remote):
 
         self.__doc__ = "\nUse help to see subcommands"
+        remote = remote or "default"
         self.configfile = configfile or '~/.aybu_manager_cli.conf'
         self.configfile = os.path.expanduser(self.configfile)
         llevel = logging.INFO if not verbose else logging.DEBUG
         self.set_log_level(llevel)
+        self.verbose = verbose
 
         try:
             self.api_client = AybuManagerClient.create_from_config(
                                                             self.configfile,
+                                                            remote=remote,
                                                             debug=verbose)
         except:
+            self.log.exception('Error creating API client')
             sys.exit()
 
         for intf in self.interfaces:

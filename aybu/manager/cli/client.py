@@ -61,21 +61,24 @@ class AybuManagerClient(object):
 
     @classmethod
     def create_from_config(cls, configfile, debug=False,
+                           remote='default',
                            overrides={}):
         config = ConfigParser.ConfigParser()
+        cls.log.debug("Reading config from %s, remote <%s>",
+                      configfile, remote)
         try:
             with open(configfile) as f:
                 config.readfp(f)
 
         except IOError as e:
-            log.critical("Cannot read config file: {}".format(e))
+            cls.log.critical("Cannot read config file: {}".format(e))
             raise
 
         kwargs = {'debug': debug}
         for var in ('username', 'password', 'host', 'subscription_addr',
                     'timeout', 'verify_ssl'):
             try:
-                kwargs[var] = config.get('remote', var, vars=overrides)
+                kwargs[var] = config.get(remote, var, vars=overrides)
                 if var == 'verify_ssl':
                     kwargs[var] = ast.literal_eval(kwargs[var])
 
