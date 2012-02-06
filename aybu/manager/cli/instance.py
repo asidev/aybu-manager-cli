@@ -26,7 +26,7 @@ class InstanceInterface(BaseInterface):
     commands = ['list', 'deploy', 'delete', 'enable', 'disable', 'flush',
                 'switch_env', 'reload', 'reload_all', 'rewrite', 'rewrite_all',
                 'delete', 'archive', 'restore', 'info', 'migrate', 'kill',
-                'force_reload']
+                'force_reload', 'change_domain']
     name = 'instances'
 
     @plac.annotations(
@@ -135,7 +135,16 @@ class InstanceInterface(BaseInterface):
         # TODO handle archive upload
         if archive:
             params['archive'] = archive
-        self.api.execute_sync_task('post', self.get_url(domain), data=params)
+        self.api.execute_sync_task('put', self.get_url(domain), data=params)
+
+    @plac.annotations(
+        domain=('The instance to rename', 'positional'),
+        new_domain=('New instance domain', 'positional')
+    )
+    def change_domain(self, domain, new_domain):
+        """ Restore an instance using a pre-created archive """
+        params = dict(action='change_domain', domain=new_domain)
+        self.api.execute_sync_task('put', self.get_url(domain), data=params)
 
     @plac.annotations(
         domain=('The instance to delete', 'positional'),
