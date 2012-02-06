@@ -161,7 +161,8 @@ class AybuManagerClient(object):
                     sys.stderr.flush()
 
             except (AttributeError, ValueError) as e:
-                self.log.error("Cannot decode json: %s", e)
+                if int(response.headers['content-length']) != 0:
+                    self.log.error("Cannot decode json: %s", e)
                 content = None
 
             return response, content
