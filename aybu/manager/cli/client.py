@@ -101,7 +101,8 @@ class AybuManagerClient(object):
         return obj
 
     def uuid(self):
-        uuid = '{}.{}-{}'.format(platform.uname()[1],
+        uuid = '{}..{}.{}-{}'.format(self.username.replace("@", "."),
+                                 platform.uname()[1],
                                  os.getpid(),
                                  self.counter)
         self.zmq_response_socket.setsockopt(zmq.SUBSCRIBE, uuid)
