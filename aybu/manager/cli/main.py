@@ -95,8 +95,8 @@ class AybuManagerCliInterface(object):
             self.log.error('Cannot connect to %s: %s', remote, e)
 
         else:
-            self.log.info("Created API client for %s", remote)
             self.api_client = api_client
+            self.log.info("Using remote %s: %s", remote, self.api_client)
             for intf in self.__class__.interface_instances.values():
                 intf.api = api_client
             self.remote_name = remote
@@ -121,6 +121,8 @@ class AybuManagerCliInterface(object):
                                                     self.configfile,
                                                     remote=self.remote_name,
                                                     debug=verbose)
+            self.log.info("Using remote %s: %s", self.remote_name,
+                          self.api_client)
         except:
             self.log.exception('Error creating API client')
             sys.exit()
@@ -130,7 +132,7 @@ class AybuManagerCliInterface(object):
 
     def show_remote(self):
         """ Show current remote """
-        self.log.info("Connected to %s", self.remote_name)
+        self.log.info("Connected to %s: %s", self.remote_name, self.api_client)
 
     def __enter__(self):
         return self

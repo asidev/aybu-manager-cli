@@ -55,6 +55,10 @@ class AybuManagerClient(object):
             self.log.debug("Created client for {} (user: {}, sub: {})"\
                     .format(self.host, self.username, self.sub_addr))
 
+    def __str__(self):
+        return "<API client for: user: {self.username} host: {self.host} "\
+               "[sub: {self.sub_addr}]>".format(self=self)
+
     @staticmethod
     def status_code_to_string(status_code):
         return httplib.responses[status_code]
