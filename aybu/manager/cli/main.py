@@ -20,6 +20,7 @@ import logging
 import os
 import plac
 import sys
+import requests
 
 from . instance import InstanceInterface
 from . task import TaskInterface
@@ -79,6 +80,10 @@ class AybuManagerCliInterface(object):
 
         self.loglevel = level
         self.log.setLevel(self.loglevel)
+        if level == logging.DEBUG:
+            requests.defaults.defaults['verbose'] = sys.stderr
+        else:
+            requests.defaults.defaults['verbose'] = None
 
     @plac.annotations(
         remote=('remote configuration section name', 'positional')

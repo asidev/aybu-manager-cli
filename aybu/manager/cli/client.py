@@ -112,7 +112,7 @@ class AybuManagerClient(object):
         return "{}{}".format(self.host, path_info)
 
     def print_headers(self, headers):
-        self.log.debug("Headers: ")
+        self.log.debug("{:<21}:".format("Response Headers"))
         for h in sorted(headers):
             self.log.debug(" {:<20}: {}".format(h.title(), headers[h]))
 
@@ -131,6 +131,8 @@ class AybuManagerClient(object):
             quiet = False
 
         try:
+            self.log.debug("Request\t: %s %s\nArgs\t: %s %s",
+                           method.upper(), url, args, kwargs)
             response = requests.request(method, url, *args, **kwargs)
 
         except requests.exceptions.RequestException as e:
