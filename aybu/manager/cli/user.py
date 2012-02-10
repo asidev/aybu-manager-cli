@@ -97,7 +97,9 @@ class UserInterface(BaseInterface):
     def update(self, email, *attribute):
         """
         Update an user data. Attributes are the same as in users_create
-        command, and they must be in the form arg=value
+        command, and they must be in the form arg=value.
+        To update user's groups, you *must* list ALL his/her new groups
+        as a comma-separated list, i.e. groups=admin,asidev,newgroup
         """
         if not attribute:
             raise ValueError('Missing options')
