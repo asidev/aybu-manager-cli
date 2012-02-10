@@ -19,21 +19,34 @@ limitations under the License.
 import plac
 from . interface import BaseInterface
 
-class GroupInterface(BaseInterface):
 
-    commands = ['list', 'create', 'rename', 'info', 'delete']
+class GroupInterface(BaseInterface):
+    commands = ['list', 'create', 'update', 'info', 'delete']
     name = 'groups'
 
     @plac.annotations(
-        group=('Group name', 'positional', None, str, None, 'NAME')
+        group=('Group name', 'positional', None, str, None, 'NAME'),
+        instance=('Instance for the group', 'option', 'i', str, None, 'DOMAIN')
     )
-    def create(self, group):
+    def create(self, group, instance=None):
         """ Create a new empty group """
-        self.api.post(self.get_url(), {'name': group})
+        data = dict(name=group)
+        if instance:
+            data['instance'] = instance
+        self.api.post(self.get_url(), data=data)
 
     @plac.annotations(
         name=('Existing group name', 'positional', None, str, None, 'NAME'),
-        new_name=('New group name', 'positional', None, str, None, 'NAME')
+        new_name=('New group name', 'option', 'n', str, None, 'NAME'),
+        instance=('Instance for the group', 'option', 'i', str, None, 'DOMAIN')
     )
-    def rename(self, name, new_name):
-        self.api.put(self.get_url(name), {'name': new_name})
+    def update(self, name, new_name=None, instance=None):
+        params = dict()
+        if new_name:
+            params['name'] = new_name
+        if not instance is None:
+            params['instance'] = instance
+        if not params:
+            self.log.error("You need to pass either a new name or a instance!")
+        else:
+            self.api.put(self.get_url(name), data=params)
