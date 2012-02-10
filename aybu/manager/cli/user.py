@@ -27,7 +27,7 @@ def comma_sep_to_list(string):
 
 class UserInterface(BaseInterface):
 
-    commands = ['list', 'create', 'update', 'info', 'delete']
+    commands = ['list', 'create', 'update', 'info', 'delete', 'check_login']
     name = 'users'
 
     @plac.annotations(
@@ -111,6 +111,21 @@ class UserInterface(BaseInterface):
 
         response, content = self.api.put(self.get_url(email), data=data)
 
+        if content:
+            for k, v in content.iteritems():
+                self.log.info("{:<20}: {}".format(k, v))
+
+    @plac.annotations(
+        domain=('Site domain', 'positional'),
+        email=('User to update', 'option', 'u')
+    )
+    def check_login(self, domain, email=None):
+        if not email:
+            email = self.api.username
+
+        res, content = self.api.get("{}?action=login&domain={}"\
+                                    .format(self.get_url(email),
+                                            domain))
         if content:
             for k, v in content.iteritems():
                 self.log.info("{:<20}: {}".format(k, v))
