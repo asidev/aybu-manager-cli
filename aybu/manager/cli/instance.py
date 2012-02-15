@@ -175,5 +175,5 @@ class InstanceInterface(BaseInterface):
     )
     def migrate(self, domain, revision='head'):
         self.api.execute_sync_task('put', self.get_url(domain),
-                                   {'action': 'migrate',
-                                    'revision': revision})
+                                   data={'action': 'migrate',
+                                         'revision': revision})
