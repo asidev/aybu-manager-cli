@@ -72,23 +72,17 @@ class ThemeInterface(BaseInterface):
         self.api.post(self.get_url(), data)
 
     @plac.annotations(
-        theme=('Theme to update', 'option', '-t', str, None, 'NAME')
+        theme=('Theme to update', 'positional', None, str, None, 'NAME')
     )
-    def update(self, theme, **attribute):
+    def update(self, theme, **attributes):
         """
         Update a theme. attributes are the same as themes_create command, and
         must be in the form arg=value
         """
-        if not attribute:
+        if not attributes:
             raise ValueError('Missing options')
 
-        data = {}
-        for attr in attribute:
-            k, v = attr.split('=',1)
-            data[k] = v
-
-        response, content = self.api.put(self.get_url(theme), data)
+        response, content = self.api.put(self.get_url(theme), data=attributes)
         if content:
             for k, v in content.iteritems():
                 print "{:<20}: {}".format(k, v)
-
