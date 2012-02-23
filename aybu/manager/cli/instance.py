@@ -37,11 +37,22 @@ class InstanceInterface(BaseInterface):
         quiet = not verbose
         response, content = self.api.get(self.root_url, quiet=quiet)
         content = content or {}
+        if not full:
+            self.log.info("environment  disabled  domain")
+            self.log.info("-----------  --------  %s", "-" * 32)
+
         for res in sorted(content):
-            self.log.info(" • [{1}] {0}".format(res,
-                                         content[res]['environment_name']))
+            marker = ''
+            if content[res]['enabled'] == False:
+                marker = 'x'
+
             if full:
+                self.log.info(" • {}".format(res))
                 self.print_info(content[res], prompt='   ° ')
+
+            else:
+                self.log.info("{1:^11}  {2:^8}  {0}"\
+                        .format(res, content[res]['environment_name'], marker))
 
     @plac.annotations(
         domain=('Domain to deploy', 'positional', None),
