@@ -30,6 +30,20 @@ class InstanceInterface(BaseInterface):
     name = 'instances'
 
     @plac.annotations(
+        full=('Get complete output', 'flag', 'f'),
+        verbose=('Be verbose', 'flag', 'v')
+    )
+    def list(self, full=False, verbose=False):
+        quiet = not verbose
+        response, content = self.api.get(self.root_url, quiet=quiet)
+        content = content or {}
+        for res in sorted(content):
+            self.log.info(" • [{1}] {0}".format(res,
+                                         content[res]['environment_name']))
+            if full:
+                self.print_info(content[res], prompt='   ° ')
+
+    @plac.annotations(
         domain=('Domain to deploy', 'positional', None),
         environment=('Env to deploy to', 'positional'),
         owner=('Owner of the instance', 'positional'),
