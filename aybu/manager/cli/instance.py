@@ -33,15 +33,23 @@ class InstanceInterface(BaseInterface):
         full=('Get complete output', 'flag', 'f'),
         verbose=('Be verbose', 'flag', 'v')
     )
-    def list(self, full=False, verbose=False):
+    def list(self, full=False, verbose=False, **attributes):
+        """ List instances. Add every search query at the end, using
+            field=value.
+            i.e. instances_list onwer_email=user@example.com sort_by=domain
+        """
         quiet = not verbose
-        response, content = self.api.get(self.root_url, quiet=quiet)
-        content = content or {}
-        if not full:
+        response, content = self.api.get(self.root_url, quiet=quiet,
+                                         query_params=attributes)
+
+        if not full and content:
             self.log.info("environment  disabled  domain")
             self.log.info("-----------  --------  %s", "-" * 32)
 
-        for res in sorted(content):
+        content = content or {}
+        keys = sorted(content) if not 'sort_by' in attributes else content
+
+        for res in keys:
             marker = ''
             if content[res]['enabled'] == False:
                 marker = 'x'
