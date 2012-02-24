@@ -25,6 +25,7 @@ import platform
 import requests
 import httplib
 import sys
+import urllib
 import zmq
 
 log = logging.getLogger(__name__)
@@ -108,8 +109,12 @@ class AybuManagerClient(object):
         self.zmq_response_socket.setsockopt(zmq.SUBSCRIBE, uuid)
         return uuid
 
-    def url(self, path_info):
-        return "{}{}".format(self.host, path_info)
+    def url(self, path_info, query_params=None):
+        res = "{}{}".format(self.host, path_info)
+        if query_params:
+            res = "{}?{}".format(res, urllib.urlencode(query_params))
+
+        return res
 
     def print_headers(self, headers):
         self.log.debug("{:<21}:".format("Response Headers"))
@@ -117,7 +122,7 @@ class AybuManagerClient(object):
             self.log.debug(" {:<20}: {}".format(h.title(), headers[h]))
 
     def request(self, method, url, *args, **kwargs):
-        url = self.url(url)
+        url = self.url(url, kwargs.pop('query_params', None))
 
         auth = kwargs.pop('auth', self.auth_info)
         timeout = kwargs.pop('timeout', self.timeout)
