@@ -26,7 +26,8 @@ class InstanceInterface(BaseInterface):
     commands = ['list', 'deploy', 'delete', 'enable', 'disable', 'flush',
                 'switch_env', 'reload', 'reload_all', 'rewrite', 'rewrite_all',
                 'delete', 'archive', 'restore', 'info', 'migrate', 'kill',
-                'force_reload', 'change_domain']
+                'force_reload', 'change_domain', 'groups_add', 'groups_remove',
+                'groups_empty', 'groups_set']
     name = 'instances'
 
     @plac.annotations(
@@ -210,3 +211,42 @@ class InstanceInterface(BaseInterface):
         self.api.execute_sync_task('put', self.get_url(domain),
                                    data={'action': 'migrate',
                                          'revision': revision})
+
+    @plac.annotations(
+        domain=('Instance domain', 'positional'),
+        group=('The group to add to instance', 'positional')
+    )
+    def groups_add(self, domain, group):
+        """ Add a group to an instance """
+        url = self.get_url(domain, 'groups', group)
+        self.api.put(url, data={})
+
+    @plac.annotations(
+        domain=('Instance domain', 'positional'),
+        group=('The group to remove from instance', 'positional')
+    )
+    def groups_remove(self, domain, group):
+        """ Remove a group from an instance.
+            Instance's own group cannot be removed
+        """
+        url = self.get_url(domain, 'groups', group)
+        self.api.delete(url)
+
+    @plac.annotations(
+        domain=('Instance domain', 'positional')
+    )
+    def groups_set(self, domain, *groups):
+        """ Replace all groups with those on commandline.
+            Instance's own group is always preserved
+        """
+        url = self.get_url(domain, 'groups')
+        self.api.post(url, data={'groups': groups})
+
+    @plac.annotations(
+        domain=('Instance domain', 'positional')
+    )
+    def groups_empty(self, domain):
+        """ Remove all groups from an instance,
+            preserving instance's own group"""
+        url = self.get_url(domain, 'groups')
+        self.api.delete(url)
