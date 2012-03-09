@@ -72,10 +72,13 @@ class InstanceInterface(BaseInterface):
         theme=('Theme name', 'option', 't', str, None, 'THEME_NAME'),
         default_language=('Default language for autoredirect', 'option', 'l'),
         disabled=('Mark the instance as disabled once deployed', 'flag', 'd'),
-        verbose=('Enable debugging messages', 'flag', 'v')
+        verbose=('Enable debugging messages', 'flag', 'v'),
+        groups=('Additional groups to add to instance (comma separated)',
+                'option', 'G')
     )
     def deploy(self, domain, environment, owner, technical_contact=None,
-               theme='', default_language='it', disabled=False, verbose=False):
+               theme='', default_language='it', disabled=False, verbose=False,
+               groups=None):
         """ deploy a new instance for a given domain. """
         data = dict(
             domain=domain,
@@ -88,6 +91,9 @@ class InstanceInterface(BaseInterface):
         if technical_contact:
             data['technical_contact_email'] = technical_contact,
         self.api.execute_sync_task('post', self.root_url, data=data)
+        if groups:
+            # this will fail if task fail or it is deferred
+            self.groups_set(domain, *groups.split(","))
 
     @plac.annotations(domain=('The instance to enable', 'positional'))
     def enable(self, domain):
