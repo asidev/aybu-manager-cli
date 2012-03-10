@@ -27,7 +27,8 @@ def comma_sep_to_list(string):
 
 class UserInterface(BaseInterface):
 
-    commands = ['list', 'create', 'update', 'info', 'delete', 'check_login']
+    commands = ['list', 'create', 'update', 'info', 'delete', 'check_login',
+                'allowed_instances']
     name = 'users'
 
     @plac.annotations(
@@ -36,15 +37,17 @@ class UserInterface(BaseInterface):
         name=('User first name (required)', 'option', 'n', str, None, 'NAME'),
         surname=('User surname (required)', 'option', 's', str, None,
                  'SURNAME'),
-        organization=('User company', 'option', 'o', str, None, 'COMPANY'),
+        company=('User company', 'option', 'C', str, None, 'COMPANY'),
         web=('User site address', 'option', 'a', str, None, 'HTTP_LINK'),
         twitter=('Username on twitter', 'option', 't', str, None, '@UNAME'),
         groups=('Comma separated list of groups the user belongs to. '
                 'Every group must exists.',
-                'option', 'g', str, None, 'GROUP[,GROUP..')
+                'option', 'G', str, None, 'GROUP[,GROUP..'),
+        organization=('Organization group for the user (it must exists)',
+                       'option', 'o', str, None, 'ORGANIZATION')
     )
-    def create(self, email, password, name, surname, organization='',
-               web='', twitter='', groups=[]):
+    def create(self, email, password, name, surname, company='',
+               web='', twitter='', groups=[], organization=None):
         """ Create a new empty user """
 
         data = dict(
@@ -52,14 +55,20 @@ class UserInterface(BaseInterface):
             password=password,
             name=name,
             surname=surname)
-        if organization:
-            data['organization'] = organization
+        if company:
+            data['company'] = company
+
         if web:
             data['web'] = web
+
         if twitter:
             data['twitter'] = twitter
+
         if groups:
             data['groups'] = comma_sep_to_list(groups)
+
+        if organization:
+            data['organization'] = organization
 
         if not self.interactive and (not email or
                                      not password or
@@ -74,16 +83,19 @@ class UserInterface(BaseInterface):
                         ('password', 'Password: ', str, True),
                         ('name', 'First Name: ', str, True),
                         ('surname', 'Surname: ', str, True),
-                        ('organization', 'Company: ', str, False),
+                        ('company', 'Company: ', str, False),
                         ('web', 'Web: ', str, False),
                         ('twitter', 'Twitter: ', str, False),
-                        ('groups', 'Groups: ', comma_sep_to_list, False)
+                        ('groups', 'Groups: ', comma_sep_to_list, False),
+                        ('organization', 'Organization: ', str, False)
             ):
                 if required and not data[attr]:
                     if attr == "password":
                         data[attr] = convert(getpass.getpass(prompt).strip())
+
                     else:
                         data[attr] = convert(raw_input(prompt).strip())
+
                 elif not required and not attr in data:
                     value = convert(raw_input(prompt).strip())
                     if value:
@@ -119,7 +131,7 @@ class UserInterface(BaseInterface):
 
     @plac.annotations(
         domain=('Site domain', 'positional'),
-        email=('User to update', 'option', 'u')
+        email=('User to check', 'option', 'u')
     )
     def check_login(self, domain, email=None):
         if not email:
@@ -131,3 +143,13 @@ class UserInterface(BaseInterface):
         if content:
             for k, v in content.iteritems():
                 self.log.info("{:<20}: {}".format(k, v))
+
+    @plac.annotations(
+        email=('User email', 'positional')
+    )
+    def allowed_instances(self, email):
+        url = self.get_url(email, 'instances')
+        response, content = self.api.get(url)
+        content = content or {}
+        for res in sorted(content):
+            self.log.info(" • {}".format(res))
