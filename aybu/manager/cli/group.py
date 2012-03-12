@@ -26,27 +26,31 @@ class GroupInterface(BaseInterface):
 
     @plac.annotations(
         group=('Group name', 'positional', None, str, None, 'NAME'),
-        instance=('Instance for the group', 'option', 'i', str, None, 'DOMAIN')
+        parent=('Parent group name (must exists)', 'option', 'p')
     )
-    def create(self, group, instance=None):
+    def create(self, group, parent=None):
         """ Create a new empty group """
         data = dict(name=group)
-        if instance:
-            data['instance'] = instance
+        if parent:
+            data['parent'] = parent
+
         self.api.post(self.get_url(), data=data)
 
     @plac.annotations(
         name=('Existing group name', 'positional', None, str, None, 'NAME'),
         new_name=('New group name', 'option', 'n', str, None, 'NAME'),
-        instance=('Instance for the group', 'option', 'i', str, None, 'DOMAIN')
+        parent=('Parent group name (must exists)', 'option', 'p')
     )
-    def update(self, name, new_name=None, instance=None):
+    def update(self, name, new_name=None, parent=None):
         params = dict()
         if new_name:
             params['name'] = new_name
-        if not instance is None:
-            params['instance'] = instance
+
+        if not parent is None:
+            params['parent'] = parent
+
         if not params:
-            self.log.error("You need to pass either a new name or a instance!")
+            self.log.error("No new params to update!")
+
         else:
             self.api.put(self.get_url(name), data=params)

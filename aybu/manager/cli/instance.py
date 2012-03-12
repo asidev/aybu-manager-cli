@@ -26,7 +26,8 @@ class InstanceInterface(BaseInterface):
     commands = ['list', 'deploy', 'delete', 'enable', 'disable', 'flush',
                 'switch_env', 'reload', 'reload_all', 'rewrite', 'rewrite_all',
                 'delete', 'archive', 'restore', 'info', 'migrate', 'kill',
-                'force_reload', 'change_domain']
+                'force_reload', 'change_domain', 'groups_add', 'groups_remove',
+                'groups_empty', 'groups_set', 'get_allowed_user']
     name = 'instances'
 
     @plac.annotations(
@@ -71,10 +72,13 @@ class InstanceInterface(BaseInterface):
         theme=('Theme name', 'option', 't', str, None, 'THEME_NAME'),
         default_language=('Default language for autoredirect', 'option', 'l'),
         disabled=('Mark the instance as disabled once deployed', 'flag', 'd'),
-        verbose=('Enable debugging messages', 'flag', 'v')
+        verbose=('Enable debugging messages', 'flag', 'v'),
+        groups=('Additional groups to add to instance (comma separated)',
+                'option', 'G')
     )
     def deploy(self, domain, environment, owner, technical_contact=None,
-               theme='', default_language='it', disabled=False, verbose=False):
+               theme='', default_language='it', disabled=False, verbose=False,
+               groups=None):
         """ deploy a new instance for a given domain. """
         data = dict(
             domain=domain,
@@ -87,6 +91,9 @@ class InstanceInterface(BaseInterface):
         if technical_contact:
             data['technical_contact_email'] = technical_contact,
         self.api.execute_sync_task('post', self.root_url, data=data)
+        if groups:
+            # this will fail if task fail or it is deferred
+            self.groups_set(domain, *groups.split(","))
 
     @plac.annotations(domain=('The instance to enable', 'positional'))
     def enable(self, domain):
@@ -210,3 +217,52 @@ class InstanceInterface(BaseInterface):
         self.api.execute_sync_task('put', self.get_url(domain),
                                    data={'action': 'migrate',
                                          'revision': revision})
+
+    @plac.annotations(
+        domain=('Instance domain', 'positional'),
+        group=('The group to add to instance', 'positional')
+    )
+    def groups_add(self, domain, group):
+        """ Add a group to an instance """
+        url = self.get_url(domain, 'groups', group)
+        self.api.put(url, data={})
+
+    @plac.annotations(
+        domain=('Instance domain', 'positional'),
+        group=('The group to remove from instance', 'positional')
+    )
+    def groups_remove(self, domain, group):
+        """ Remove a group from an instance.
+            Instance's own group cannot be removed
+        """
+        url = self.get_url(domain, 'groups', group)
+        self.api.delete(url)
+
+    @plac.annotations(
+        domain=('Instance domain', 'positional')
+    )
+    def groups_set(self, domain, *groups):
+        """ Replace all groups with those on commandline.
+            Instance's own group is always preserved
+        """
+        url = self.get_url(domain, 'groups')
+        self.api.post(url, data={'groups': groups})
+
+    @plac.annotations(
+        domain=('Instance domain', 'positional')
+    )
+    def groups_empty(self, domain):
+        """ Remove all groups from an instance,
+            preserving instance's own group"""
+        url = self.get_url(domain, 'groups')
+        self.api.delete(url)
+
+    @plac.annotations(
+        domain=('Instance domain to check')
+    )
+    def get_allowed_user(self, domain):
+        url = self.get_url(domain, 'users')
+        response, content = self.api.get(url)
+        content = content or {}
+        for res in sorted(content):
+            self.log.info(" • {}".format(res))
