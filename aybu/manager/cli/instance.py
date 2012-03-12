@@ -27,7 +27,7 @@ class InstanceInterface(BaseInterface):
                 'switch_env', 'reload', 'reload_all', 'rewrite', 'rewrite_all',
                 'delete', 'archive', 'restore', 'info', 'migrate', 'kill',
                 'force_reload', 'change_domain', 'groups_add', 'groups_remove',
-                'groups_empty', 'groups_set', 'get_allowed_user']
+                'groups_empty', 'groups_set', 'allowed_users']
     name = 'instances'
 
     @plac.annotations(
@@ -260,7 +260,7 @@ class InstanceInterface(BaseInterface):
     @plac.annotations(
         domain=('Instance domain to check')
     )
-    def get_allowed_user(self, domain):
+    def allowed_users(self, domain):
         url = self.get_url(domain, 'users')
         response, content = self.api.get(url)
         content = content or {}
