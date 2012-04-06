@@ -27,7 +27,7 @@ class InstanceInterface(BaseInterface):
                 'switch_env', 'reload', 'reload_all', 'rewrite', 'rewrite_all',
                 'delete', 'archive', 'restore', 'info', 'migrate', 'kill',
                 'force_reload', 'change_domain', 'groups_add', 'groups_remove',
-                'groups_empty', 'groups_set', 'allowed_users']
+                'groups_empty', 'groups_set', 'allowed_users', 'migrate_all']
     name = 'instances'
 
     @plac.annotations(
@@ -215,6 +215,16 @@ class InstanceInterface(BaseInterface):
     )
     def migrate(self, domain, revision='head'):
         self.api.execute_sync_task('put', self.get_url(domain),
+                                   data={'action': 'migrate',
+                                         'revision': revision})
+
+    @plac.annotations(
+        revision=('Schema revision to migrate to', 'option', 'm', str, None,
+                  'REV')
+    )
+    def migrate_all(self, revision="head"):
+        """ Migrate all instances at once """
+        self.api.execute_sync_task('put', self.root_url,
                                    data={'action': 'migrate',
                                          'revision': revision})
 
