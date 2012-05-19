@@ -27,13 +27,13 @@ class EnvironmentInterface(BaseInterface):
 
     @plac.annotations(
         name=('Environment name', 'positional'),
-        venv_name=('Virtualenv name to associate to this env.', 'option',
+        virtualenv_name=('Virtualenv name to associate to this env.', 'option',
                    'e', str, None, 'VENV')
     )
-    def create(self, name, venv_name=None):
+    def create(self, name, virtualenv_name=None):
         data = dict(name=name)
-        if venv_name:
-            data['venv_name'] = venv_name
+        if virtualenv_name:
+            data['virtualenv_name'] = virtualenv_name
 
         self.api.execute_sync_task('post', self.root_url, data=data)
 
