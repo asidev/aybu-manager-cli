@@ -142,7 +142,7 @@ class UserInterface(BaseInterface):
                                             domain))
         if content:
             for k, v in content.iteritems():
-                self.log.info("{:<20}: {}".format(k, v))
+                self.log.info(unicode("{:<20}: {}").format(k, v))
 
     @plac.annotations(
         email=('User email', 'positional')
