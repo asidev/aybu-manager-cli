@@ -108,7 +108,7 @@ class BaseInterface(object):
             return
         max_len = max({len(k) for k in content})
         max_len = 30 if max_len < 30 else max_len
-        format_string = "{}{:<%d}: {}" % (max_len)
+        format_string = unicode("{}{:<%d}: {}" % (max_len))
 
         for attr in sorted(content.keys()):
             key = attr

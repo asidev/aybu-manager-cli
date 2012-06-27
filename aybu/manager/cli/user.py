@@ -127,7 +127,7 @@ class UserInterface(BaseInterface):
 
         if content:
             for k, v in content.iteritems():
-                self.log.info("{:<20}: {}".format(k, v))
+                self.log.info(unicode("{:<20}: {}").format(k, v))
 
     @plac.annotations(
         domain=('Site domain', 'positional'),
