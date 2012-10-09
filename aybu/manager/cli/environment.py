@@ -21,7 +21,7 @@ from . interface import BaseInterface
 
 
 class EnvironmentInterface(BaseInterface):
-    commands = ['list', 'create', 'delete', 'rename', 'info']
+    commands = ['list', 'create', 'delete', 'rename', 'info', 'rewrite']
     name = 'envs'
     root_url = '/environments'
 
@@ -46,3 +46,10 @@ class EnvironmentInterface(BaseInterface):
     def delete(self, name):
         """ Delete the selected instance """
         self.api.execute_sync_task('delete', self.get_url(name))
+
+    @plac.annotations(
+        name=('Name of the environment to rewrite', 'positional')
+    )
+    def rewrite(self, name):
+        self.api.execute_sync_task('put', self.get_url(name),
+                                   data={'action': 'rewrite'})
